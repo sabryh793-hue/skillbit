@@ -1,0 +1,65 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { QuizService } from './quiz.service';
+import { CreateQuizDto } from './dto/create-quiz.dto';
+import { SubmitQuizDto } from './dto/submit-quiz.dto';
+import { Auth } from 'src/common/decorators/auth.decorator';
+import type { AuthReq } from '../../common/AuthReq';
+import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { UserRoles } from 'src/common';
+
+@Controller('quiz')
+export class QuizController {
+  constructor(private readonly quizService: QuizService) { }
+
+  @Auth(UserRoles.Admin)
+  @Post('create')
+  async createQuiz(@Body() createQuizDto: CreateQuizDto) {
+    const quiz = await this.quizService.createQuiz(createQuizDto)
+    return { message: 'Quiz created successfully', data: quiz }
+  }
+
+  @Auth('Admin')
+  @Patch('update/:id')
+  async updateQuiz(@Param('id') quizId: string, @Body() updateQuizDto: UpdateQuizDto) {
+    const quiz = await this.quizService.updateQuiz(quizId, updateQuizDto)
+    return { message: 'Quiz updated successfully', data: quiz }
+  }
+
+  @Auth('Admin')
+  @Delete('delete/:id')
+  async deleteQuiz(@Param('id') quizId: string) {
+    await this.quizService.deleteQuiz(quizId)
+    return { message: 'Quiz deleted successfully' }
+  }
+
+  @Auth('Student')
+  @Get('start/:id')
+  async startQuiz(@Param('id') quizId: string, @Req() req: AuthReq) {
+    const result = await this.quizService.startQuiz(quizId, req.user.id)
+    return { message: 'Quiz started successfully', data: result }
+  }
+
+  @Auth('Student')
+  @Post('submit')
+  async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @Req() req: AuthReq) {
+    const result = await this.quizService.submitQuiz(submitQuizDto, req.user.id)
+    return { message: 'Quiz submitted successfully', data: result }
+  }
+
+  @Auth('Student')
+  @Get('results/:quizId')
+  async getQuizResults(@Param('quizId') quizId: string, @Req() req: AuthReq) {
+    const result = await this.quizService.getQuizAnswers(quizId, req.user.id)
+    return { message: 'Quiz results retrieved successfully', data: result }
+  }
+
+}
