@@ -1,6 +1,5 @@
 // course.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Types } from 'mongoose'
 import { CourseStatusEnum } from 'src/common/enums/courseSatuesEnum';
 
 export enum CourseType {
@@ -47,7 +46,7 @@ export class Course {
   @Prop({ type: String, default: '' })
   courseImage: string;
 
-  @Prop({ type: CourseStatusEnum, default: CourseStatusEnum.LOCKED })
+  @Prop({ type: String,enum:CourseStatusEnum, default: CourseStatusEnum.LOCKED })
   status: CourseStatusEnum;
 
 }

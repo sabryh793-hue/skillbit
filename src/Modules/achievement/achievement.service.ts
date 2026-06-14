@@ -5,6 +5,7 @@ import { CreateAchievementDto } from './dto/create-achievement.dto';
 import { UpdateAchievementDto } from './dto/update-achievement.dto';
 import { CourseRepo } from '../../Models/Cousrses/course.repo';
 import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
+import { CourseType } from 'src/Models/Cousrses/course.schema';
 
 
 @Injectable()
@@ -81,8 +82,8 @@ export class AchievementService {
     const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } })
     if (!enrollment) throw new NotFoundException('You should enroll in courses first')
 
-    const allRequired = await this.courseRepo.find({ type: { $ne: 'optional' } })
-    const allOptional = await this.courseRepo.find({ type: 'optional' })
+    const allRequired = await this.courseRepo.find({ type: { $ne: CourseType.OPTIONAL } })
+    const allOptional = await this.courseRepo.find({ type: CourseType.OPTIONAL })
 
     const completedRequiredIds = enrollment.completedCourses
       .map((id: any) => id.toString())
