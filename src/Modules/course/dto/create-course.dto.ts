@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import {IsString, IsNotEmpty, IsNumber, IsBoolean, Min, Max, IsEnum, IsArray, ValidateNested} from 'class-validator';
+import {IsString, IsNotEmpty, IsNumber, IsBoolean, Min, Max, IsEnum, IsArray, ValidateNested, IsOptional} from 'class-validator';
 import { CourseType } from 'src/Models/Cousrses/course.schema';
 
 
@@ -40,6 +40,7 @@ export class CreateCourseDto {
   passScore: number;           // defaults to 70 in schema
 
   @IsString()
+  @IsOptional()
   courseImage: string;
 }
 
