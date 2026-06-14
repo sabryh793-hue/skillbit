@@ -6,12 +6,6 @@ import { CreateLessonDto } from './dto/create-lesson.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { uploadToCloudinary } from '../../common/utils/cloudinary';
 import { QuizRepo } from '../../Models/Quizes/quiz.repo';
-
-//OOP 
- //=>>
-   //..
- //=>>
-  //..
   
 @Injectable()
 export class LessonService {

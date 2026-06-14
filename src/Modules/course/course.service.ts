@@ -4,12 +4,13 @@ import { CourseRepo } from '../../Models/Cousrses/course.repo';
 import { CourseType } from '../../Models/Cousrses/course.schema';
 import { LevelRepo } from '../../Models/Levels/level.repo';
 import { LessonRepo } from '../../Models/Lessons/lesson.repo';
-import { CreateBulkCoursesDto, CreateCourseDto } from './dto/create-course.dto';
+import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { UserRepo } from '../../Models/User/user.repo';
 import { QuizRepo } from '../../Models/Quizes/quiz.repo';
 import { AchievementService } from '../achievement/achievement.service';
 import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
+import { CourseStatusEnum } from 'src/common/enums/courseSatuesEnum';
 
 @Injectable()
 export class CourseService {
@@ -22,8 +23,6 @@ export class CourseService {
     private readonly quizRepo: QuizRepo,
     private readonly achievementService: AchievementService,
   ) { }
-
-  //TODO:get course details with lessons and quizzes => update getCourseById
 
   async createCourse(dto: CreateCourseDto) {
     //check if level exists
@@ -63,10 +62,13 @@ export class CourseService {
     const lessonsWithQuizzes = await Promise.all(
       lessons.map(async (lesson) => {
         const quiz = await this.quizRepo.findOne({
-          filter: { lessonId: lesson['_id'] } // ✅ check your schema field name
+          filter: { lessonId: lesson['_id'] }
         })
+
         return {
-          ...lesson.toObject(),
+          name: lesson.title,
+          id: lesson['_id'],
+          order: lesson.order,
           quiz: quiz || null
         }
       })
@@ -125,6 +127,12 @@ export class CourseService {
     await this.enrollmentRepo.findOneAndUpdate({
       filter: { userId },
       update: { $push: { enrolledCourses: courseId } },
+      options: { new: true }
+    })
+    //update course status
+    await this.courseRepo.findOneAndUpdate({
+      filter: { _id: courseId },
+      update: { $set: { status: CourseStatusEnum.ACTIVE } },
       options: { new: true }
     })
     return true
@@ -273,69 +281,75 @@ export class CourseService {
 
     //Update Badge
 
+    //update course status to finished
+    await this.courseRepo.findOneAndUpdate({
+      filter: { _id: courseId },
+      update: { $set: { status: CourseStatusEnum.FINISHED } },
+      options: { new: true }
+    })
+
 
 
   }
 
-  //get User Courses By their levels
-  async getUserCoursesByLevels(userId: string) {
-  // 1. get enrollment
-  const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } })
-  if (!enrollment) throw new NotFoundException('You should enroll in courses first')
+  //get lvl progress that means percantage of courses[completed or not]
+   async getLvlProgress(lvlnum: number) {
 
-  // convert to string arrays once
-  const completedIds = enrollment.completedCourses.map((id: any) => id.toString())
-  const passedIds = enrollment.passedCourses.map((id: any) => id.toString())
-  const enrolledIds = enrollment.enrolledCourses.map((id: any) => id.toString())
-  const completedOptionalIds = enrollment.completedOptionalCourses.map((id: any) => id.toString())
+    //1. get all courses in this level
+    const courses = await this.courseRepo.find({ filter: { level: lvlnum } })
 
-  // 2. get all levels + all courses in ONE call each
-  const [levels, allCourses] = await Promise.all([
-    this.levelRepo.find({}),
-    this.courseRepo.find({}) // get ALL courses at once ✅
-  ]) 
+    //get courses count 
+    const coursesCount = courses.length
 
-  // 3. group courses by level in memory (no more DB calls!)
-  const result = levels.map((level: any) => {
-    const levelCourses = allCourses
-      .filter((c: any) => c.level.toString() === level['_id'].toString())
-      .map((course: any) => {
-        const courseId = course['_id'].toString()
+    //2. get completed courses
+    const completedCourses = await this.enrollmentRepo.find({ filter: { completedCourses: { $in: courses.map((c: any) => c._id) } } })
 
-        let status: string
-        if (course.type === CourseType.OPTIONAL) {
-          status = completedOptionalIds.includes(courseId) ? 'completed' : 'not started'
-        } else {
-          if (completedIds.includes(courseId)) status = 'completed'
-          else if (passedIds.includes(courseId)) status = 'passed'
-          else if (enrolledIds.includes(courseId)) status = 'enrolled'
-          else status = 'not started'
-        }
+    //3. calculate percantage
+    const percentage = (completedCourses.length / coursesCount) * 100
 
+
+    return { percentage }
+
+   }
+
+  async getUserHomeScreenData(userId: string, levelnum: number) {
+
+    //get USER
+    const user = await this.userRepo.findById({ id: userId })
+    if (!user) throw new NotFoundException('User not found');
+
+    //get level with it's progress then return the courses of his levle with it's status
+    const levelData = await this.levelRepo.find({ filter: { order: levelnum } })
+    if (!levelData) throw new NotFoundException('Level not found');
+
+
+    //get lvl progress
+    const lvlProgress = await this.getLvlProgress(levelnum)
+
+    //get courses of this level
+    const courses = await this.courseRepo.find({ filter: { level: levelnum } })
+
+    //then return each course of level by it's data
+    return {
+      userName: user.fullname,
+      userProfilePicture: user.profilePicture,
+
+      lvlProgress,
+
+      courses: courses.map((c: any) => {
         return {
-          _id: course['_id'],
-          title: course.title,
-          description: course.description,
-          difficulty: course.difficulty,
-          order: course.order,
-          type: course.type,
-          isLocked: course.isLocked,
-          earnScore: course.earnScore,
-          profilePicture: course.profilePicture,
-          status 
+          _id: c['_id'],
+          title: c.title,
+          description: c.description,
+          difficulty: c.difficulty,
+          order: c.order,
+          type: c.type,
+          isLocked: c.isLocked,
+          earnScore: c.earnScore,
+          profilePicture: c.courseImage,
+          status: c.status
         }
       })
-      .sort((a: any, b: any) => a.order - b.order) // sort by order
-
-    return {
-      level: {
-        _id: level['_id'],
-        name: level.name
-      },
-      courses: levelCourses
     }
-  })
-
-  return result
-}
+  }
 }

@@ -86,4 +86,11 @@ export class CourseController {
     const percentage =await this.courseService.getCourseProgress(userId, courseId);
     return {message: "Course progress fetched successfully", percentage}
   }
+
+  @UseGuards(AuthGuard)
+  @Get('home')
+  async getUserHomeScreenData(@User('id') userId: string, @Query('level') levelnum: number) {
+    const data =await this.courseService.getUserHomeScreenData(userId, levelnum);
+    return {message: "Home screen data fetched successfully", data}
+  }
 }

@@ -41,7 +41,6 @@ async function bootstrap() {
    )
 
   //app.useGlobalInterceptors(new LoggingInterceptor());
-
   await app.listen(port, '0.0.0.0');
   }
 

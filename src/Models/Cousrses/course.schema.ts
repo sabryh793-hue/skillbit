@@ -1,6 +1,7 @@
 // course.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose'
+import { CourseStatusEnum } from 'src/common/enums/courseSatuesEnum';
 
 export enum CourseType {
   MANDATORY = 'mandatory',
@@ -34,18 +35,21 @@ export class Course {
   @Prop({ type: Boolean, default: true })
   isLocked: boolean;              //optional courses will always be false
 
-   @Prop({ type: Number, default: 70, min: 0, max: 100 })
-   passScore: number;            // min quiz % score to unlock the NEXT mandatory course
+  @Prop({ type: Number, default: 70, min: 0, max: 100 })
+  passScore: number;            // min quiz % score to unlock the NEXT mandatory course
 
   @Prop({ type: Number, default: 0 })
   averageRating: number;
-  
+
   @Prop({ type: Number, default: 0 })
   totalFavorites: number;
 
   @Prop({ type: String, default: '' })
-  profilePicture: string;
- 
+  courseImage: string;
+
+  @Prop({ type: CourseStatusEnum, default: CourseStatusEnum.LOCKED })
+  status: CourseStatusEnum;
+
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
