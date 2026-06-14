@@ -38,6 +38,9 @@ export class CreateCourseDto {
   @Min(0)
   @Max(100)
   passScore: number;           // defaults to 70 in schema
+
+  @IsString()
+  courseImage: string;
 }
 
 
