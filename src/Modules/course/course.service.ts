@@ -346,7 +346,7 @@ export class CourseService {
           type: c.type,
           isLocked: c.isLocked,
           earnScore: c.earnScore,
-          profilePicture: c.courseImage,
+          //profilePicture: c.courseImage,
           status: c.status
         }
       })
