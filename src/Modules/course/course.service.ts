@@ -317,20 +317,7 @@ export class CourseService {
       userProfilePicture: user.profilePicture,
 
       //return each course completed or not
-      courses: courses.map((c: any) => {
-        return {
-          _id: c['_id'],
-          title: c.title,
-          description: c.description,
-          difficulty: c.difficulty,
-          order: c.order,
-          type: c.type,
-          isLocked: c.isLocked,
-          earnScore: c.earnScore,
-          profilePicture: c.courseImage,
-          status: c.status
-        }
-      })
+      courses
     }
    
     
