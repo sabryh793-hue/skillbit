@@ -91,6 +91,7 @@ export class CourseController {
   @UseGuards(AuthGuard)
   @Get('home')
   async getUserHomeScreenData(@User('id') userId: string,@Query('level', ParseIntPipe) level: number) {
+    console.log(level)
     const data =await this.courseService.getUserHomeScreenData(userId, level);
     return {message: "Home screen data fetched successfully", data}
   }

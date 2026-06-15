@@ -324,7 +324,7 @@ export class CourseService {
 
 
     //get lvl progress
-    const lvlProgress = await this.getLvlProgress(levelnum)
+   // const lvlProgress = await this.getLvlProgress(levelnum)
 
     //get courses of this level
     const courses = await this.courseRepo.find({ filter: { level: levelnum } })
@@ -334,7 +334,7 @@ export class CourseService {
       userName: user.fullname,
       userProfilePicture: user.profilePicture,
 
-      lvlProgress,
+      //lvlProgress,
 
       courses: courses.map((c: any) => {
         return {
