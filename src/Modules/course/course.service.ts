@@ -296,33 +296,21 @@ export class CourseService {
   
 
   async getUserHomeScreenData(userId: string, levelnum: number) {
+  // get USER
+  const user = await this.userRepo.findById({ id: userId })
+  if (!user) throw new NotFoundException('User not found');
 
-    //get USER
-    const user = await this.userRepo.findById({ id: userId })
-    if (!user) throw new NotFoundException('User not found');
+  // get courses in this level
+  const courses = await this.courseRepo.find({ filter: { level: levelnum } })
 
-    //get level with it's progress then return the courses of his levle with it's status
-    const levelData = await this.levelRepo.find({ filter: { order: levelnum } })
-    if (!levelData) throw new NotFoundException('Level not found');
-    
-
-    //1. get all courses in this level
-    const courses = await this.courseRepo.find({ filter: { level: levelnum } }) 
-    
-    //return level progress[status]
-
-    const levelProgress = await this.enrollmentRepo.find({ filter: { userId } })
-    
-    return{
-      userName: user.fullname,
-      userProfilePicture: user.profilePicture,
-
-      //return each course completed or not
-      courses
-    }
-   
-    
-  
-      
-    }
+  return {
+    userName: user.fullname,
+    userProfilePicture: user.profilePicture,
+    courses: courses.map(course => ({
+      id: course['_id'],
+      title: course.title,
+      image: course.courseImage,
+    }))
   }
+}
+}
