@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
+import { QuizStatusEnum } from "src/common/enums/courseSatuesEnum";
 
 @Schema({ timestamps: true })
 export class Quiz {//exam paper template
@@ -34,6 +35,9 @@ export class Quiz {//exam paper template
     default: []
   })
   questions: { question: string; options: string[]; correctAnswerIndex: number }[];
+
+  @Prop({ type: String, enum: [QuizStatusEnum], default: QuizStatusEnum.LOCKED })
+  status: QuizStatusEnum
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);

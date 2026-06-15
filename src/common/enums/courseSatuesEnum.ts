@@ -3,3 +3,9 @@ export enum CourseStatusEnum {
     ACTIVE = 'active',
     LOCKED = 'locked',
 }
+
+export enum QuizStatusEnum {
+    PASSED = 'passed',
+    FAILED = 'failed',
+    LOCKED = 'locked',
+}
