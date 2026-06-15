@@ -69,6 +69,7 @@ export class CourseService {
           name: lesson.title,
           id: lesson['_id'],
           order: lesson.order,
+          isLocked: lesson.isLocked,
           quiz: quiz || null
         }
       })
