@@ -57,6 +57,8 @@ export class CourseController {
   @UseGuards(AuthGuard)
   @Get(':id')
   async getCourseById(@Param('id') id: string) {
+      console.log('GET COURSE ID =', id);
+
     const course = await this.courseService.getCourseById(id);
     return {message: "Course fetched successfully", course}
   }
@@ -92,6 +94,8 @@ export class CourseController {
   @UseGuards(AuthGuard)
   @Get(':id/progress')
   async courseProgress(@User('id') userId: string, @Param('id') courseId: string) {
+      console.log('HOME ENDPOINT HIT');
+
     const percentage =await this.courseService.getCourseProgress(userId, courseId);
     return {message: "Course progress fetched successfully", percentage}
   }
