@@ -64,7 +64,7 @@ export class CourseService {
         const quiz = await this.quizRepo.findOne({
           filter: { lessonId: lesson['_id'] }
         })
-
+        console.log(lesson.isLocked)
         return {
           name: lesson.title,
           id: lesson['_id'],
