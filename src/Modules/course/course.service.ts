@@ -292,25 +292,7 @@ export class CourseService {
 
   }
 
-  //get lvl progress that means percantage of courses[completed or not]
-   async getLvlProgress(lvlnum: number) {
-
-    //1. get all courses in this level
-    const courses = await this.courseRepo.find({ filter: { level: lvlnum } })
-
-    //get courses count 
-    const coursesCount = courses.length
-
-    //2. get completed courses
-    const completedCourses = await this.enrollmentRepo.find({ filter: { completedCourses: { $in: courses.map((c: any) => c._id) } } })
-
-    //3. calculate percantage
-    const percentage = (completedCourses.length / coursesCount) * 100
-
-
-    return { percentage }
-
-   }
+  
 
   async getUserHomeScreenData(userId: string, levelnum: number) {
 
@@ -321,21 +303,20 @@ export class CourseService {
     //get level with it's progress then return the courses of his levle with it's status
     const levelData = await this.levelRepo.find({ filter: { order: levelnum } })
     if (!levelData) throw new NotFoundException('Level not found');
+    
 
+    //1. get all courses in this level
+    const courses = await this.courseRepo.find({ filter: { level: levelnum } }) 
+    
+    //return level progress[status]
 
-    //get lvl progress
-   // const lvlProgress = await this.getLvlProgress(levelnum)
-
-    //get courses of this level
-    const courses = await this.courseRepo.find({ filter: { level: levelnum } })
-
-    //then return each course of level by it's data
-    return {
+    const levelProgress = await this.enrollmentRepo.find({ filter: { userId } })
+    
+    return{
       userName: user.fullname,
       userProfilePicture: user.profilePicture,
 
-      //lvlProgress,
-
+      //return each course completed or not
       courses: courses.map((c: any) => {
         return {
           _id: c['_id'],
@@ -346,10 +327,14 @@ export class CourseService {
           type: c.type,
           isLocked: c.isLocked,
           earnScore: c.earnScore,
-          //profilePicture: c.courseImage,
+          profilePicture: c.courseImage,
           status: c.status
         }
       })
     }
+   
+    
+  
+      
+    }
   }
-}

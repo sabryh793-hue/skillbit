@@ -70,8 +70,8 @@ export class LessonService {
     //get quiz of lesson
     const quiz = await this.quizRepo.findOne({filter:{lessonId:lessonId}})
     
-
-    return {lesson,quiz} 
+  
+   return {lesson,quiz} 
     
   }
 
