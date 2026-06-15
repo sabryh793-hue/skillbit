@@ -46,6 +46,14 @@ export class CourseController {
     return {message: "Courses fetched successfully", courses}
   }
 
+   @UseGuards(AuthGuard)
+  @Get('home')
+  async getUserHomeScreenData(@User('id') userId: string,@Query('level', ParseIntPipe) level: number) {
+    console.log(level)
+    const data =await this.courseService.getUserHomeScreenData(userId, level);
+    return {message: "Home screen data fetched successfully", data}
+  }
+
   @UseGuards(AuthGuard)
   @Get(':id')
   async getCourseById(@Param('id') id: string) {
@@ -88,11 +96,4 @@ export class CourseController {
     return {message: "Course progress fetched successfully", percentage}
   }
 
-  @UseGuards(AuthGuard)
-  @Get('home')
-  async getUserHomeScreenData(@User('id') userId: string,@Query('level', ParseIntPipe) level: number) {
-    console.log(level)
-    const data =await this.courseService.getUserHomeScreenData(userId, level);
-    return {message: "Home screen data fetched successfully", data}
-  }
 }
