@@ -96,7 +96,7 @@ export class LessonService {
       options: { new: true },
     });
     if (!lesson) throw new NotFoundException('Lesson not found');
-    return lesson;
+   /// return lesson;
   }
 
   async deleteLesson(lessonId: string) {
