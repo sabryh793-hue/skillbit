@@ -54,7 +54,7 @@ export class CourseService {
     if (!course) throw new NotFoundException('Course not found')
 
     const lessons = await this.lessonRepo.find(
-      { course: courseId }, // ✅ matches schema
+      { course: courseId }, 
       {},
       { sort: { order: 1 } }
     )
