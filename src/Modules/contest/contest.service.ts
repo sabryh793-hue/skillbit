@@ -23,7 +23,7 @@ export class ContestService {
   ) { }
 
 
-  async createContest(dto: CreateContestDto , topic: string) {
+  async createContest(dto: CreateContestDto ) {
     // delete old finished contests for same level and type
     await this.contestRepo.deleteOne({
       filter: {
@@ -51,13 +51,17 @@ export class ContestService {
     const { data } = await axios.post(
     'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
     {
-      topic
+      topic : dto.topic
     }
   );
     // 2. create contest
     const contest = await this.contestRepo.create({
       ...dto,
-      questions : data.questions,
+      questions : data.questions.map((q: any) => ({
+        question: q.question,
+        options: q.options.map((o: any) => o.text),
+        correctAnswerIndex: q.correct_answer,
+      })),
 
       status: 'upcoming',
     })
@@ -137,7 +141,7 @@ export class ContestService {
     return { questions : contest.questions }
   }
 
-  async submitContest(user: any, contestId: string, answers: number[], timeTaken: number) {
+  async submitContest(user: any, contestId: string, answers: string[], timeTaken: number) {
     const contest = await this.contestRepo.findById({ id: contestId })
     if (!contest) throw new NotFoundException('Contest not found')
     
@@ -158,7 +162,7 @@ export class ContestService {
 
   
     contest.questions.forEach((q, index) => {
-      if (answers[index] === -1 || answers[index] === undefined) return//means question is not answered return to the next iteration
+      if (answers[index] === '-1' || answers[index] === undefined) return//means question is not answered return to the next iteration
 
       const isCorrect = q.correctAnswerIndex === answers[index]
       if (isCorrect) correctCount++

@@ -13,9 +13,17 @@ export class CreateContestDto {
   @IsNotEmpty()
   level: string
 
+  @IsString()
+  @IsNotEmpty()
+  topic: string
+
+  @IsString()
+  @IsNotEmpty()
+  difficulty: string
+
   @IsDate()
   @Type(() => Date)
-  startTime: Date
+  startTime: Date //like 2026-08-05T17:00:00.000Z
 
   @IsNumber()
   duration: number // minutes

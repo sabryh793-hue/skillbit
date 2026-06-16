@@ -15,6 +15,12 @@ export class Contest  {
   @Prop({ type: String, required: true })
   level: string;
 
+  @Prop({ type: String, required: true })
+  topic: string;
+
+  @Prop({ type: String, required: true })
+  difficulty: string;
+
   @Prop({ type: Date, required: true })
   startTime: Date;
 
@@ -31,17 +37,14 @@ export class Contest  {
   type: [{
     question: { type: String, required: true },
     options: { type: [String], required: true },
-    correctAnswerIndex: { type: Number, required: true },
+    correctAnswerIndex: { type: String, required: true },
   }],
   default: []
 })
-questions: { question: string; options: string[]; correctAnswerIndex: number }[]
+questions: { question: string; options: string[]; correctAnswerIndex: string }[]
 
 @Prop({ type: Number, required: true, default: 5 })
 questionScore: number // base score for each question in this contest
- 
-  @Prop({ type: String, required: true })
-  difficulty: string;
   // Duel only
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
   challengerId: mongoose.Schema.Types.ObjectId;

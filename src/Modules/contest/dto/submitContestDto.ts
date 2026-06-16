@@ -1,10 +1,10 @@
-import { ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class SubmitContestDto {
   @IsArray()
-  @IsNumber({}, { each: true })
+  @IsString({}, { each: true })
   @ArrayMinSize(1)
-  answers: number[]
+  answers: string[]
 
   @IsNumber()
   @IsOptional()
