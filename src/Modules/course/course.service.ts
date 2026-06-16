@@ -311,38 +311,40 @@ export class CourseService {
 
 
   async getUserHomeScreenData(userId: string, levelnum: number) {
-  // get USER
-  const user = await this.userRepo.findById({ id: userId })
-  if (!user) throw new NotFoundException('User not found');
+    // get USER
+    const user = await this.userRepo.findById({ id: userId })
+    if (!user) throw new NotFoundException('User not found');
 
-   //get level progress percentage
-   const levelProgress = await this.getLvlProgress(userId, levelnum)
+    //get level progress percentage
+    const levelProgress = await this.getLvlProgress(userId, levelnum)
 
-      // get courses in this level
-      const courses = await this.courseRepo.find({ level: levelnum }, {}, { sort: { order: 1 } });
-           
- 
-  return {
-    userName: user.fullname,
-    userProfilePicture: user.profilePicture,
+    // get courses in this level
+    const courses = await this.courseRepo.find({ level: levelnum }, {}, { sort: { order: 1 } });
+            
+    const coursesWithProgress = await Promise.all(
+      courses.map(async (course) => {
+       // const progress = await this.getCourseProgress(userId, course['_id'].toString());
+        return {
+          id: course['_id'],
+          title: course.title,
+          description: course.description,
+          type: course.type,
+          earnScore: course.earnScore,
+          passScore: course.passScore,
+          isTutorial: course.isTutorial,
+          isLocked: course.isLocked,
+          status: course.status,
+          image: course.courseImage,
+          //courseProgress: progress,
+        };
+      })
+    );
 
-    levelProgress: levelProgress,
-
-    courses: courses.map(course => ({
-      id: course['_id'],
-      title: course.title,
-      description: course.description,
-      type:course.type,
-      earnScore:course.earnScore,
-      passScore:course.passScore,
-      isTutorial:course.isTutorial,
-      isLocked:course.isLocked,
-      status:course.status,
-      image: course.courseImage,
-
-      //get course  progress 
-      courseProgress: this.getCourseProgress(userId, course['_id'])
-    }))
+    return {
+      userName: user.fullname,
+      userProfilePicture: user.profilePicture,
+      levelProgress: levelProgress,
+      courses: coursesWithProgress,
+    };
   }
-}
 }

@@ -9,6 +9,7 @@ import { sendEmail } from 'src/common';
 import { CronJob } from 'cron';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { AchievementService } from '../achievement/achievement.service';
+import axios from 'axios';
 
 @Injectable()
 export class ContestService {
@@ -22,7 +23,7 @@ export class ContestService {
   ) { }
 
 
-  async createContest(dto: CreateContestDto) {
+  async createContest(dto: CreateContestDto , topic: string) {
     // delete old finished contests for same level and type
     await this.contestRepo.deleteOne({
       filter: {
@@ -44,11 +45,20 @@ export class ContestService {
       }
     })
     if (existingContest)
-      throw new ConflictException('There is a  contest already exists at this time')
+      throw new ConflictException('There is a contest already exists at this time')
 
+    //get the questions of contest from ai model
+    const { data } = await axios.post(
+    'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+    {
+      topic
+    }
+  );
     // 2. create contest
     const contest = await this.contestRepo.create({
       ...dto,
+      questions : data.questions,
+
       status: 'upcoming',
     })
 
