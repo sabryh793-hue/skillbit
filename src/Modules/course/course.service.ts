@@ -282,7 +282,6 @@ export class CourseService {
 
     // 6. calculate percentage
     const percentage = totalQuizzes > 0 ? (passedQuizzesCount / totalQuizzes) * 100 : 0;
-    console.log(percentage);
 
     // Update the course progress in the enrollment record.
     // Check if progress already exists for this course.
@@ -310,14 +309,13 @@ export class CourseService {
 
   async getLvlProgress(userId: string, levelnum: number) {
     const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } });
-    if (!enrollment) throw new NotFoundException('You should enroll in courses first');
 
     const courses = await this.courseRepo.find({ level: levelnum });
     const totalCourses = courses.length;
 
-    const completedCourseIds = enrollment.completedCourses.map((id: any) => id.toString());
+    const completedCourseIds = enrollment?.completedCourses.map((id: any) => id.toString());
     const levelCourseIds = courses.map((c: any) => c['_id'].toString());
-    const passedCoursesCount = levelCourseIds.filter(id => completedCourseIds.includes(id)).length;
+    const passedCoursesCount = levelCourseIds.filter(id => completedCourseIds?.includes(id)).length;
      //const passedCoursesCount = completedCourseIds.length
     const percentage = (passedCoursesCount / totalCourses) * 100;
 
@@ -338,7 +336,7 @@ export class CourseService {
             
     const coursesWithProgress = await Promise.all(
       courses.map(async (course) => {
-       // const progress = await this.getCourseProgress(userId, course['_id'].toString());
+        const progress = await this.getCourseProgress(userId, course['_id'].toString());
         return {
           id: course['_id'],
           title: course.title,
@@ -350,7 +348,7 @@ export class CourseService {
           isLocked: course.isLocked,
           status: course.status,
           image: course.courseImage,
-          //courseProgress: progress,
+          courseProgress: progress,
         };
       })
     );

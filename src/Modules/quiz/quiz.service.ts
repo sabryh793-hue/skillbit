@@ -41,26 +41,32 @@ export class QuizService {
       throw new ConflictException('Quiz already exists for this lesson')
     }
 
-    //get quiz question
-   const { data } = await axios.post(
-       'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
-       {
-         topic : createQuizDto.topic
-       }
-     );
+    //get the questions of contest from ai model
+    
+  const { data } = await axios.post(
+    'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+    {
+      topic: createQuizDto.topic,
+    }
+  );
 
-   const quiz = await this.quizRepo.create({
-      ...createQuizDto,
-      questions : data.questions.map((q: any) => ({
-        question: q.question,
-        options: q.options.map((o: any) => o.text),
-        correctAnswerIndex: q.correct_answer,
-      })),
-     
-    })
-    return data.quiz
+  console.log('AI RESPONSE', data);
+  console.log('data.questions',data.questions)
 
-  }
+
+
+       // 2. create contest
+       const quiz = await this.quizRepo.create({
+         ...createQuizDto,
+         questions : data.questions.map((q: any) => ({
+           question: q.question,
+           options: q.options.map((o: any) => o.text),
+           correctAnswerIndex: q.correct_answer,
+         }))
+       })
+   
+       return quiz
+     }
 
   async startQuiz(quizId: string, userId: string) {
     // 1. check quiz exists
