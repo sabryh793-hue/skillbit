@@ -21,6 +21,7 @@ export class Lesson  {
 
   @Prop({ type: Boolean, default: true })
   isLocked: boolean;
+
   
 }
 

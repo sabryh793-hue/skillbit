@@ -1,7 +1,8 @@
-import { ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class SubmitContestDto {
   @IsArray()
+  @IsString({ each: true })
   @ArrayMinSize(1)
   answers: string[]
 

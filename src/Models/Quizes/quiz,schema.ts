@@ -8,6 +8,9 @@ export class Quiz {//exam paper template
   @Prop({ type: String, required: true })
   title: string;
 
+  @Prop({ type: String, required: true })
+  topic:string
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson', default: null })
   lessonId: mongoose.Schema.Types.ObjectId;
 

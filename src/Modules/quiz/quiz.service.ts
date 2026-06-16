@@ -14,6 +14,7 @@ import { QuizAttemptRepo } from '../../Models/Quizes/quizAttempt.repo';
 import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { UserRepo } from '../../Models/User/user.repo';
+import axios from 'axios';
 
 @Injectable()
 export class QuizService {
@@ -40,9 +41,25 @@ export class QuizService {
       throw new ConflictException('Quiz already exists for this lesson')
     }
 
+    //get quiz question
+   const { data } = await axios.post(
+       'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+       {
+         topic : createQuizDto.topic
+       }
+     );
 
-    const quiz = await this.quizRepo.create(createQuizDto)
-    return quiz
+   const quiz = await this.quizRepo.create({
+      ...createQuizDto,
+      questions : data.questions.map((q: any) => ({
+        question: q.question,
+        options: q.options.map((o: any) => o.text),
+        correctAnswerIndex: q.correct_answer,
+      })),
+     
+    })
+    return data.quiz
+
   }
 
   async startQuiz(quizId: string, userId: string) {

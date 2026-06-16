@@ -33,6 +33,10 @@ export class CreateQuizDto {
   @IsNotEmpty()
   title: string;
 
+  @IsString()
+  @IsNotEmpty()
+  topic: string;
+
   @IsOptional()
   @IsMongoId()
   lessonId?: string; // omit for a final-course quiz
