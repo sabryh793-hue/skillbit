@@ -35,7 +35,6 @@ export class CourseController {
   @Get()
   async getCoursesByLevel(@Query('level') levelnum: number) {
     const courses =await this.courseService.getCoursesByLevel(levelnum);
-    console.log(courses)
     return {message: "Courses fetched successfully", courses}
   }
 
@@ -49,16 +48,29 @@ export class CourseController {
    @UseGuards(AuthGuard)
   @Get('home')
   async getUserHomeScreenData(@User('id') userId: string,@Query('level', ParseIntPipe) level: number) {
-    console.log(level)
     const data =await this.courseService.getUserHomeScreenData(userId, level);
     return {message: "Home screen data fetched successfully", data}
+  }
+
+
+  @UseGuards(AuthGuard)
+  @Get('levelprogress')
+  async getLvlProgress(@User('id') userId: string, @Query('level', ParseIntPipe) levelnum: number) {
+    const percentage =await this.courseService.getLvlProgress(userId, levelnum);
+    return {message: "Level progress fetched successfully", percentage}
+  }
+
+   @UseGuards(AuthGuard)
+  @Get('courseprogress/:id')
+  async courseProgress(@User('id') userId: string, @Param('id') courseId: string) {
+    console.log('courseId', courseId);
+    const percentage =await this.courseService.getCourseProgress(userId, courseId);
+    return {message: "Course progress fetched successfully", percentage}
   }
 
   @UseGuards(AuthGuard)
   @Get(':id')
   async getCourseById(@Param('id') id: string) {
-      console.log('GET COURSE ID =', id);
-
     const course = await this.courseService.getCourseById(id);
     return {message: "Course fetched successfully", course}
   }
@@ -91,13 +103,6 @@ export class CourseController {
     return {message: "Course completed successfully", course}
   }
 
-  @UseGuards(AuthGuard)
-  @Get(':id/progress')
-  async courseProgress(@User('id') userId: string, @Param('id') courseId: string) {
-      console.log('HOME ENDPOINT HIT');
-
-    const percentage =await this.courseService.getCourseProgress(userId, courseId);
-    return {message: "Course progress fetched successfully", percentage}
-  }
+  
 
 }

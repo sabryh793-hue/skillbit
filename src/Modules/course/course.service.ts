@@ -10,7 +10,7 @@ import { UserRepo } from '../../Models/User/user.repo';
 import { QuizRepo } from '../../Models/Quizes/quiz.repo';
 import { AchievementService } from '../achievement/achievement.service';
 import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
-import { CourseStatusEnum } from 'src/common/enums/courseSatuesEnum';
+import { CourseStatusEnum } from 'src/common/enums/courseSatuesEnum'; 
 
 @Injectable()
 export class CourseService {
@@ -64,7 +64,6 @@ export class CourseService {
         const quiz = await this.quizRepo.findOne({
           filter: { lessonId: lesson['_id'] }
         })
-        console.log(lesson.isLocked)
         return {
           name: lesson.title,
           id: lesson['_id'],
@@ -137,36 +136,6 @@ export class CourseService {
       options: { new: true }
     })
     return true
-  }
-
-  async getCourseProgress(userId: string, courseId: string) {
-    //here we calc the percentage of passed quizes (from the total quizes in the course) , then we update the courseProgress in the enrollment record
-
-    const course = await this.courseRepo.findById({ id: courseId });
-    if (!course) throw new NotFoundException('Course not found');
-
-    const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } });
-    if (!enrollment) throw new NotFoundException('You should enroll in courses first');
-
-    // 4. get all quizzes in this course
-    const allQuizzes = await this.quizRepo.find({ filter: { course: courseId } })
-    const totalQuizzes = allQuizzes.length
-
-    // 5. get passed quizzes count for this course 
-    const completedQuizIds = enrollment.completedQuizes.map((id: any) => id.toString())
-    const courseQuizIds = allQuizzes.map((q: any) => q['_id'].toString())
-    const passedQuizzesCount = courseQuizIds.filter(id => completedQuizIds.includes(id)).length
-
-    // 6. calculate percentage
-    const percentage = (passedQuizzesCount / totalQuizzes) * 100
-
-    //update course progress in the enrollment record
-    await this.enrollmentRepo.findOneAndUpdate({
-      filter: { userId },
-      update: { $set: { courseProgress: { courseId, percentage } } }, //set => replace the value (old vlaue => new value)
-      options: { new: true }
-    })
-    return percentage;
   }
 
   async finishCourse(userId: string, courseId: string) {
@@ -293,23 +262,86 @@ export class CourseService {
 
   }
 
-  
+  async getCourseProgress(userId: string, courseId: string) {
+    //here we calc the percentage of passed quizes (from the total quizes in the course) , then we update the courseProgress in the enrollment record
+
+    const course = await this.courseRepo.findById({ id: courseId });
+    if (!course) throw new NotFoundException('Course not found');
+
+    const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } });
+    if (!enrollment) throw new NotFoundException('You should enroll in courses first');
+
+    // 4. get all quizzes in this course
+    const allQuizzes = await this.quizRepo.find({ filter: { course: courseId } })
+    const totalQuizzes = allQuizzes.length
+
+    // 5. get passed quizzes count for this course 
+    const completedQuizIds = enrollment.completedQuizes.map((id: any) => id.toString())
+    const courseQuizIds = allQuizzes.map((q: any) => q['_id'].toString())
+    const passedQuizzesCount = courseQuizIds.filter(id => completedQuizIds.includes(id)).length
+
+    // 6. calculate percentage
+    const percentage = (passedQuizzesCount / totalQuizzes) * 100
+    console.log(percentage);
+
+    //update course progress in the enrollment record
+    await this.enrollmentRepo.findOneAndUpdate({
+      filter: { userId },
+      update: { $set: { courseProgress: { courseId, percentage } } }, //set => replace the value (old vlaue => new value)
+      options: { new: true }
+    })
+    return percentage;
+  }
+
+  async getLvlProgress(userId: string, levelnum: number) {
+    const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } });
+    if (!enrollment) throw new NotFoundException('You should enroll in courses first');
+
+    const courses = await this.courseRepo.find({ level: levelnum });
+    const totalCourses = courses.length;
+
+    const completedCourseIds = enrollment.completedCourses.map((id: any) => id.toString());
+    const levelCourseIds = courses.map((c: any) => c['_id'].toString());
+    const passedCoursesCount = levelCourseIds.filter(id => completedCourseIds.includes(id)).length;
+     //const passedCoursesCount = completedCourseIds.length
+    const percentage = (passedCoursesCount / totalCourses) * 100;
+
+    return percentage;
+  }
+
 
   async getUserHomeScreenData(userId: string, levelnum: number) {
   // get USER
   const user = await this.userRepo.findById({ id: userId })
   if (!user) throw new NotFoundException('User not found');
 
-  // get courses in this level
-  const courses = await this.courseRepo.find({ filter: { level: levelnum } })
+   //get level progress percentage
+   const levelProgress = await this.getLvlProgress(userId, levelnum)
 
+      // get courses in this level
+      const courses = await this.courseRepo.find({ level: levelnum }, {}, { sort: { order: 1 } });
+           
+ 
   return {
     userName: user.fullname,
     userProfilePicture: user.profilePicture,
+
+    levelProgress: levelProgress,
+
     courses: courses.map(course => ({
       id: course['_id'],
       title: course.title,
+      description: course.description,
+      type:course.type,
+      earnScore:course.earnScore,
+      passScore:course.passScore,
+      isTutorial:course.isTutorial,
+      isLocked:course.isLocked,
+      status:course.status,
       image: course.courseImage,
+
+      //get course  progress 
+      courseProgress: this.getCourseProgress(userId, course['_id'])
     }))
   }
 }

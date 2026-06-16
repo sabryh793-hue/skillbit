@@ -41,7 +41,7 @@ async function bootstrap() {
    )
 
   //app.useGlobalInterceptors(new LoggingInterceptor());
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   }
 
 void bootstrap()//It is used to avoid the warning "Function has no return type but is not a void function." in TypeScript.so this is a way to tell TypeScript that this function does not return anything.
