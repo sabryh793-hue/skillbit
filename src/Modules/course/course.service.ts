@@ -153,7 +153,7 @@ export class CourseService {
 
     //get course progress
     const percentage = enrollment.courseProgress.find((item: any) => item.courseId.toString() === courseId)?.percentage
-    if (!percentage) throw new NotFoundException('Course progress not found');
+    if (percentage === undefined) throw new NotFoundException('Course progress not found');
 
     // Scenario 1 — below 70% → error 
     if (percentage < 70) {
@@ -281,15 +281,30 @@ export class CourseService {
     const passedQuizzesCount = courseQuizIds.filter(id => completedQuizIds.includes(id)).length
 
     // 6. calculate percentage
-    const percentage = (passedQuizzesCount / totalQuizzes) * 100
+    const percentage = totalQuizzes > 0 ? (passedQuizzesCount / totalQuizzes) * 100 : 0;
     console.log(percentage);
 
-    //update course progress in the enrollment record
-    await this.enrollmentRepo.findOneAndUpdate({
-      filter: { userId },
-      update: { $set: { courseProgress: { courseId, percentage } } }, //set => replace the value (old vlaue => new value)
-      options: { new: true }
-    })
+    // Update the course progress in the enrollment record.
+    // Check if progress already exists for this course.
+    const hasProgress = enrollment.courseProgress.some(
+      (item: any) => item.courseId.toString() === courseId
+    );
+
+    if (hasProgress) {
+      // If it exists, update the specific item's percentage
+      await this.enrollmentRepo.findOneAndUpdate({
+        filter: { userId, 'courseProgress.courseId': courseId },
+        update: { $set: { 'courseProgress.$.percentage': percentage } },
+        options: { new: true }
+      });
+    } else {
+      // If it doesn't exist, push the new progress object
+      await this.enrollmentRepo.findOneAndUpdate({
+        filter: { userId },
+        update: { $push: { courseProgress: { courseId, percentage } } },
+        options: { new: true }
+      });
+    }
     return percentage;
   }
 

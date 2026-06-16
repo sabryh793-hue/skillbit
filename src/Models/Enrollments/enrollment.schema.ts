@@ -27,7 +27,15 @@ export class Enrollment {
   completedOptionalCourses: mongoose.Schema.Types.ObjectId[]
   
   //each course will have a progress percentage
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }], default: [] })
+  @Prop({
+    type: [
+      {
+        courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+        percentage: { type: Number, default: 0 }
+      }
+    ],
+    default: []
+  })
   courseProgress: {courseId: string, percentage: number}[]
 }
 
