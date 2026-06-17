@@ -52,6 +52,13 @@ export class CourseController {
     return {message: "Home screen data fetched successfully", data}
   }
 
+   @UseGuards(AuthGuard)
+  @Post('enroll/:courseId')
+  async enrollInCourse(@User('id') userId: string, @Param('courseId') courseId: string) {
+    const course =await this.courseService.enrollInCourse(userId, courseId);
+    return {message: "Course enrolled successfully", course}
+  }
+
 
   @UseGuards(AuthGuard)
   @Get('levelprogress')
@@ -89,18 +96,13 @@ export class CourseController {
     return {message: "Course deleted successfully"}
   }
 
-  @UseGuards(AuthGuard)
-  @Post('enroll/:courseId')
-  async enrollInCourse(@User('id') userId: string, @Param('courseId') courseId: string) {
-    const course =await this.courseService.enrollInCourse(userId, courseId);
-    return {message: "Course enrolled successfully", course}
-  }
+ 
 
   @UseGuards(AuthGuard)
-  @Post(':id/complete')
-  async completeCourse(@User('id') userId: string, @Param('id') courseId: string) {
+  @Post('complete/:id')
+  async finishCourse(@User('id') userId: string, @Param('id') courseId: string) {
     const course =await this.courseService.finishCourse(userId, courseId);
-    return {message: "Course completed successfully", course}
+    return {message: "Course finished successfully", course}
   }
 
   

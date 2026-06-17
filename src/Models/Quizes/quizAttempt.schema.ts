@@ -17,8 +17,8 @@ export class QuizAttempt { // Student's Answer Sheet
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' })
   lessonId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: [Number], default: [] })
-  answers: number[];
+  @Prop({ type: [String], default: [] })
+  answers: string[];
 
   @Prop({ type: Number, default: 0 })
   correctCount: number;

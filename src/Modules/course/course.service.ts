@@ -110,8 +110,12 @@ export class CourseService {
     const course = await this.courseRepo.findById({ id: courseId });
     if (!course) throw new NotFoundException('Course not found');
 
+    //chechk if already enrolled
+    const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } })
+    if (enrollment && enrollment.enrolledCourses.some((id: any) => id.toString() === courseId)) throw new BadRequestException('You are already enrolled in this course');
+    
     if (course.order === 1 || course.type === CourseType.OPTIONAL) {
-      return this.enrollmentRepo.findOneAndUpdate({
+       this.enrollmentRepo.findOneAndUpdate({
         filter: { userId },
         update: { $push: { enrolledCourses: courseId } },
         options: { new: true, upsert: true } //upsert: true means if the enrollment record is not found, it will be created
@@ -126,7 +130,7 @@ export class CourseService {
     //update enrollment
     await this.enrollmentRepo.findOneAndUpdate({
       filter: { userId },
-      update: { $push: { enrolledCourses: courseId } },
+      update: { $set: { enrolledCourses: courseId } },
       options: { new: true }
     })
     //update course status
@@ -322,14 +326,13 @@ export class CourseService {
     return percentage;
   }
 
-
   async getUserHomeScreenData(userId: string, levelnum: number) {
     // get USER
     const user = await this.userRepo.findById({ id: userId })
     if (!user) throw new NotFoundException('User not found');
 
     //get level progress percentage
-    const levelProgress = await this.getLvlProgress(userId, levelnum)
+    const levelProgress = await this.getLvlProgress(userId, levelnum) 
 
     // get courses in this level
     const courses = await this.courseRepo.find({ level: levelnum }, {}, { sort: { order: 1 } });

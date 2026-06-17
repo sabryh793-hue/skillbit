@@ -74,14 +74,45 @@ export class QuizService {
       return []
     }
 
-    // 2. check enrollment
+     // 2. check enrollment
     const lesson = await this.lessonRepo.findById({ id: quiz.lessonId })
-    const enrollment = await this.enrollmentRepo.findOne({
-      filter: { userId, courseId: lesson?.course }
-    })
-    if (!enrollment) {
-      throw new ForbiddenException('You are not enrolled in this course')
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found')
     }
+  
+    const enrollment = await this.enrollmentRepo.findOne({
+      filter: { userId, courseId: lesson.course }
+    })
+    // if (!enrollment) {
+    //   throw new ForbiddenException('You are not enrolled in this course')
+    // }
+
+    //check if quiz  order = 1 ,, no rules to check
+    if(quiz.order == 1){
+      //create new attempt
+      const attempt = await this.quizAttemptRepo.create({
+        courseId: lesson.course,
+        userId,
+        quizId,
+        lessonId: quiz.lessonId,
+        status: 'in-progress'
+      })
+      //return questions without correctAnswerIndex
+      const questions = quiz.questions.map(({ question, options }) => ({
+        question,
+        options
+      }))
+      return {
+        attemptId: attempt['_id'],
+        quizId: quiz._id,
+        difficulty: quiz.difficulty,
+        timeLimit: quiz.timeLimit,
+        passingScore: quiz.passingScore,
+        questions
+      }
+    }
+   
+   
 
     // 3. check previous quiz passed
     if (quiz.order > 1) {
@@ -89,7 +120,7 @@ export class QuizService {
         filter: { lessonId: quiz.lessonId, order: quiz.order - 1 }
       })
       if (previousQuiz) {
-        const isPreviousPassed = enrollment.completedQuizes
+        const isPreviousPassed = enrollment!.completedQuizes
           .some(id => id.toString() === previousQuiz._id.toString())
         if (!isPreviousPassed) {
           throw new ForbiddenException('Please pass the previous quiz first')
@@ -97,7 +128,7 @@ export class QuizService {
       }
     }
 
-    // 4. check if already inProgress attempt exists → resume it
+    // 4. check if already inProgress attempt exists → resume it 
     const existingAttempt = await this.quizAttemptRepo.findOne({
       filter: { userId, quizId, status: 'in-progress' }
     })
@@ -118,7 +149,9 @@ export class QuizService {
 
     // 5. create new inProgress attempt
     const attempt = await this.quizAttemptRepo.create({
+    
       userId,
+      courseId: lesson.course,
       quizId,
       lessonId: quiz.lessonId,
       status: 'in-progress'
@@ -147,6 +180,7 @@ export class QuizService {
     if (!quiz) {
       throw new NotFoundException('Quiz not found')
     }
+   
 
     // 2. check if user started the quiz
     const attempt = await this.quizAttemptRepo.findOne({

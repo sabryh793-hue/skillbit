@@ -15,6 +15,7 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import type { AuthReq } from '../../common/AuthReq';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { UserRoles } from 'src/common';
+import { User } from 'src/common/decorators/user.decorator';
 
 @Controller('quiz')
 export class QuizController {
@@ -41,17 +42,17 @@ export class QuizController {
     return { message: 'Quiz deleted successfully' }
   }
 
-  @Auth('Student')
+  //@Auth('Student')
   @Get('start/:id')
-  async startQuiz(@Param('id') quizId: string, @Req() req: AuthReq) {
-    const result = await this.quizService.startQuiz(quizId, req.user.id)
+  async startQuiz(@Param('id') quizId: string, @User('id') userId: string) {
+    const result = await this.quizService.startQuiz(quizId, userId)
     return { message: 'Quiz started successfully', data: result }
   }
 
   @Auth('Student')
   @Post('submit')
-  async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @Req() req: AuthReq) {
-    const result = await this.quizService.submitQuiz(submitQuizDto, req.user.id)
+  async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @User('id') userId: string) {
+    const result = await this.quizService.submitQuiz(submitQuizDto, userId)
     return { message: 'Quiz submitted successfully', data: result }
   }
 

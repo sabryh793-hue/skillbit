@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsNumber, IsOptional, ArrayMinSize, Min } from 'class-validator';
+import { IsArray, IsMongoId, IsNumber, IsOptional, ArrayMinSize, Min, IsString } from 'class-validator';
 
 export class SubmitQuizDto {
   @IsMongoId()
@@ -7,10 +7,9 @@ export class SubmitQuizDto {
   // Index-aligned with quiz.questions[]
   // answers[0] = chosen option index for questions[0]
   @IsArray()
-  @IsNumber({}, { each: true })//means each element in the array should be a number .
-  @Min(0, { each: true })
+  @IsString({ each: true })
   @ArrayMinSize(1)
-  answers: number[];
+  answers: string[];
 
   @IsOptional()
   @IsNumber()
