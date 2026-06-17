@@ -13,42 +13,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) { }
 
- async signUp(dto: signUpDto) {
-  const user = await this.userRepo.findByEmail(dto.email);
-  if (user) {
-    throw new ConflictException('User already exists');
-  }
-
-  const otp = generateOTP(6);
-
-  const createdUser = await this.userRepo.create({
-    fullname: dto.fullname,
-    email: dto.email,
-    password: await Hash(dto.password),
-    role: dto.role,
-    level: dto.level,
-    isVerified: false,
-    emailOtp: {
-      code: otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    },
-  });
-
-  sendEmail({
-    to: dto.email,
-    subject: 'OTP Request',
-    html: `<h1>Hello ${createdUser.fullname}</h1>
-           <p>Your OTP is: <strong>${otp}</strong></p>
-           <p>This OTP will expire in 10 minutes.</p>`,
-  }).catch(err => console.error('Email failed:', err));
-
-  return {
-    id: createdUser['_id'],
-    fullname: createdUser.fullname,
-    email: createdUser.email,
-    role: createdUser.role,
-  };
-}
+  
     //with google and github we will skip email verification and directly set isVerified to true
   async googleLogin(googleLoginDto: googleLoginDto) {
     //get data from request
@@ -106,18 +71,58 @@ export class AuthService {
       refreshToken,
     }
   }
+  
+ async signUp(dto: signUpDto) {
+  const user = await this.userRepo.findByEmail(dto.email);
+  if (user) {
+    throw new ConflictException('User already exists');
+  }
+
+  const otp = generateOTP(6);
+
+  const createdUser = await this.userRepo.create({
+    fullname: dto.fullname,
+    email: dto.email,
+    password: await Hash(dto.password),
+    role: dto.role,
+    level: dto.level,
+    isVerified: false,
+    emailOtp: { 
+      code: otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
+  console.log('SIGNUP:', createdUser.emailOtp.expiresAt);
+  sendEmail({
+    to: dto.email,
+    subject: 'OTP Request',
+    html: `<h1>Hello ${createdUser.fullname}</h1>
+           <p>Your OTP is: <strong>${otp}</strong></p>
+           <p>This OTP will expire in 10 minutes.</p>`,
+  }).catch(err => console.error('Email failed:', err));
+
+  return {
+    id: createdUser['_id'],
+    fullname: createdUser.fullname,
+    email: createdUser.email,
+    role: createdUser.role,
+  };
+}
 
   async confirmEmail(email: string, otp: string) {
     const user = await this.userRepo.findByEmail(email)
     if (!user) {
       throw new NotFoundException('User not found')
     }
-
+  
     if (!user.emailOtp) {
   throw new BadRequestException('No OTP found')
 }
+//5:30                      <                 5:40
+if (user.emailOtp.expiresAt <  new Date(Date.now())) {
+ console.log('CONFIRM:', user.emailOtp.expiresAt);
 
-if (user.emailOtp.expiresAt <  new Date(Date.now() + 10 * 60 * 1000)) {
   throw new BadRequestException('OTP expired, request a new one')
 }
 

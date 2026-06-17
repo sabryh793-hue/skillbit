@@ -96,8 +96,6 @@ export class CourseController {
     return {message: "Course deleted successfully"}
   }
 
- 
-
   @UseGuards(AuthGuard)
   @Post('complete/:id')
   async finishCourse(@User('id') userId: string, @Param('id') courseId: string) {
