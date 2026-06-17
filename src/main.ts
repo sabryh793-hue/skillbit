@@ -23,6 +23,8 @@ async function bootstrap() {
   #D - Dependency Inversion Principle: High-level modules should not depend on low-level modules. Both should depend on abstractions. Abstractions should not depend on details. Details should depend on abstractions. This means that a class should depend on abstractions rather than concrete implementations. This makes the code more maintainable and easier to understand.
   */
  
+  console.log('BREVO:', process.env.BREVO_API_KEY);
+  
   const port = Number(process.env.PORT || 7000)//number because process.env.PORT is string and app.listen need number.
   
   app.use("/uploads", express.static(path.resolve("./uploads"))) //It is a middleware that is used to serve the files that are uploaded by the user.[static used to show the files when browser ask for it.]//👉 بيفتح الفولدر كله public, يعني أي حد يعرف path يقدر يوصله

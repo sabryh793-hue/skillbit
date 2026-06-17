@@ -113,9 +113,17 @@ export class AuthService {
       throw new NotFoundException('User not found')
     }
 
-    if (!user.emailOtp || user.emailOtp.expiresAt < new Date() || user.emailOtp.code !== otp) {
-      throw new BadRequestException('OTP expired, request a new one')
-    }
+    if (!user.emailOtp) {
+  throw new BadRequestException('No OTP found')
+}
+
+if (user.emailOtp.expiresAt < new Date()) {
+  throw new BadRequestException('OTP expired, request a new one')
+}
+
+if (user.emailOtp.code !== otp) {
+  throw new BadRequestException('Invalid OTP')
+}
 
     await this.userRepo.Update({
       filter: { email },
