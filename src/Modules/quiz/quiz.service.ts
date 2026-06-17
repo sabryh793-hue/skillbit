@@ -48,12 +48,7 @@ export class QuizService {
     {
       topic: createQuizDto.topic,
     }
-  );
-
-  console.log('AI RESPONSE', data);
-  console.log('data.questions',data.questions)
-
-
+  )
 
        // 2. create contest
        const quiz = await this.quizRepo.create({

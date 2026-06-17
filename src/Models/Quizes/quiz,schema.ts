@@ -33,7 +33,7 @@ export class Quiz {//exam paper template
     type: [{
       question:      { type: String, required: true },
       options:       { type: [String], required: true },
-      correctAnswerIndex: { type: Number, required: true },
+      correctAnswerIndex: { type: String, required: true },
     }],
     default: []
   })
