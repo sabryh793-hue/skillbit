@@ -117,7 +117,7 @@ export class AuthService {
   throw new BadRequestException('No OTP found')
 }
 
-if (user.emailOtp.expiresAt < new Date()) {
+if (user.emailOtp.expiresAt <  new Date(Date.now() + 10 * 60 * 1000)) {
   throw new BadRequestException('OTP expired, request a new one')
 }
 
