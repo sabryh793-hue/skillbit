@@ -280,16 +280,16 @@ export class CourseService {
     const totalQuizzes = allQuizzes.length
 
     // 5. get passed quizzes count for this course 
-    const completedQuizIds = enrollment!.completedQuizes.map((id: any) => id.toString())
+    const completedQuizIds = enrollment?.completedQuizes.map((id: any) => id.toString())
     const courseQuizIds = allQuizzes.map((q: any) => q['_id'].toString())
-    const passedQuizzesCount = courseQuizIds.filter(id => completedQuizIds.includes(id)).length
+    const passedQuizzesCount = courseQuizIds.filter(id => completedQuizIds?.includes(id)).length
 
     // 6. calculate percentage
     const percentage = totalQuizzes > 0 ? (passedQuizzesCount / totalQuizzes) * 100 : 0;
 
     // Update the course progress in the enrollment record.
     // Check if progress already exists for this course.
-    const hasProgress = enrollment!.courseProgress.some(
+    const hasProgress = enrollment?.courseProgress.some(
       (item: any) => item.courseId.toString() === courseId
     );
 
