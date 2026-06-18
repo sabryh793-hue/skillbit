@@ -67,14 +67,12 @@ export abstract class DBService<T> { //abstract class to avoid direct instantiat
   }
 
    async findByIdAndUpdate({
-    id,
-    update,
-    options = {},
-  }: {
-    id: string | Types.ObjectId
-    update: UpdateQuery<T>
-    options?: QueryOptions<T>
-  }) {
+  id, update, options = {},
+}: {
+  id: string | Types.ObjectId
+  update: UpdateQuery<T>
+  options?: QueryOptions<T>
+}) {
     return await this.model.findByIdAndUpdate(id, update, options)
   }
   
