@@ -46,7 +46,7 @@ export class QuizController {
   
   @Auth(UserRoles.Admin , UserRoles.User)
   @Get('start/:id')
-  async startQuiz(@Param('id',ParseObjectIdPipe) quizId: string , @User('id') userId: string) {
+  async startQuiz(@Param('id') quizId: string , @User('id') userId: string) {
     const result = await this.quizService.startQuiz(quizId, userId)
     return { message: 'Quiz started successfully', data: result }
   }

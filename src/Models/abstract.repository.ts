@@ -1,3 +1,4 @@
+import { ParseObjectIdPipe } from '@nestjs/mongoose'
 import {
   Model,
   MongooseBaseQueryOptions,
