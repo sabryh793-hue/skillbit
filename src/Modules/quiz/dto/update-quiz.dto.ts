@@ -25,6 +25,10 @@ class UpdateQuestionDto {
   @IsNumber()
   @Min(0)
   correctAnswerIndex: number;
+
+  @IsOptional()
+  @IsString()
+  correctAnswerHint?: string;
 }
 
 export class UpdateQuizDto {

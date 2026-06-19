@@ -25,6 +25,10 @@ class QuestionDto {
   @IsNumber()
   @Min(0)
   correctAnswerIndex: number; // index into options[]
+
+  @IsOptional()
+  @IsString()
+  correctAnswerHint?: string;
 }
 
 export class CreateQuizDto {

@@ -58,6 +58,7 @@ export class QuizService {
            question: q.question,
            options: q.options.map((o: any) => o.text),
            correctAnswerIndex: q.correct_answer,
+           correctAnswerHint: q.explanation || '',
          }))
        })
    
@@ -275,12 +276,10 @@ export class QuizService {
     }
 
     return {
-      passed,
-      score,
-      correctCount,
+      wrongAnswers: quiz.questions.length - correctCount,
+      correctAnswers: correctCount,
       totalQuestions: quiz.questions.length,
-      xpEarned,
-      xpLost,
+      quizScore: score,
     }
   }
 
@@ -305,6 +304,7 @@ export class QuizService {
       options: q.options,
       chosenAnswerIndex: attempt.answers[index],
       correctAnswerIndex: q.correctAnswerIndex,
+      correctAnswerHint: q.correctAnswerHint || '',
       isCorrect: attempt.answers[index] === q.correctAnswerIndex
     }))
 

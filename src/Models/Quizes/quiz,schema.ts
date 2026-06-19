@@ -34,10 +34,11 @@ export class Quiz {//exam paper template
       question:      { type: String, required: true },
       options:       { type: [String], required: true },
       correctAnswerIndex: { type: String, required: true },
+      correctAnswerHint: { type: String, default: '' },
     }],
     default: []
   })
-  questions: { question: string; options: string[]; correctAnswerIndex: string }[];
+  questions: { question: string; options: string[]; correctAnswerIndex: string; correctAnswerHint?: string }[];
 
   @Prop({ type: String, enum: [QuizStatusEnum], default: QuizStatusEnum.LOCKED })
   status: QuizStatusEnum
