@@ -38,7 +38,7 @@ async function bootstrap() {
      new ValidationPipe({
        whitelist: true,//if true it will remove any properties that are not defined in the DTO (Data Transfer Object) class. If false it will allow any properties that are not defined in the DTO class.
        forbidNonWhitelisted: false,//if true it will throw an error if there are any properties that are not defined in the DTO class. If false it will allow any properties that are not defined in the DTO class.
-     //transform: true,//if true it will transform the incoming request body and query params to the DTO class. If false it will not transform the incoming request body and query params to the DTO class.
+       transform: true,//if true it will transform the incoming request body and query params to the DTO class. If false it will not transform the incoming request body and query params to the DTO class.
      }),
    )
 

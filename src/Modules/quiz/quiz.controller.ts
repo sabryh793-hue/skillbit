@@ -12,11 +12,9 @@ import { QuizService } from './quiz.service';
 import { CreateQuizDto } from './dto/create-quiz.dto';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { Auth } from 'src/common/decorators/auth.decorator';
-import type { AuthReq } from '../../common/AuthReq';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { UserRoles } from 'src/common';
 import { User } from 'src/common/decorators/user.decorator';
-import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('quiz')
 export class QuizController {
@@ -51,8 +49,10 @@ export class QuizController {
     return { message: 'Quiz started successfully', data: result }
   }
 
+  @Auth(UserRoles.Admin , UserRoles.User)
   @Post('submit')
   async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @User('id') userId: string) {
+    console.log(userId)
     const result = await this.quizService.submitQuiz(submitQuizDto, userId)
     return { message: 'Quiz submitted successfully', data: result }
   }

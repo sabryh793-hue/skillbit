@@ -192,8 +192,13 @@ export class QuizService {
 
     // 2. check if user started the quiz
     const attempt = await this.quizAttemptRepo.findOne({
-      filter: { userId, quizId, status: 'in-progress' }
+      filter:{
+        userId,
+        quizId,
+        status: 'in-progress' 
+        }
     })
+
     if (!attempt) {
       throw new ForbiddenException('Please start the quiz first')
     }
