@@ -15,6 +15,7 @@ import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { UserRepo } from '../../Models/User/user.repo';
 import axios from 'axios';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class QuizService {
@@ -61,7 +62,7 @@ export class QuizService {
        })
    
        return quiz
-     }
+  }
 
   async startQuiz(quizId: string, userId: string) {
     // 1. check quiz exists
@@ -69,6 +70,7 @@ export class QuizService {
     if (!quiz) {
       throw new NotFoundException('Quiz not found')
     }
+
     //if quiz has no questions return empty array
     if(!quiz.questions?.length){
       return []
@@ -80,12 +82,17 @@ export class QuizService {
       throw new NotFoundException('Lesson not found')
     }
   
-    const enrollment = await this.enrollmentRepo.findOne({
-      filter: { userId, courseId: lesson.course }
-    })
-    // if (!enrollment) {
-    //   throw new ForbiddenException('You are not enrolled in this course')
-    // }
+     //log the course title
+    const course = await this.courseRepo.findById({ id: lesson.course })
+
+    const enrollment = await this.enrollmentRepo.findOne(
+     { filter: { userId,enrolledCourses : course?._id }}
+    )
+
+    if (!enrollment) {
+      throw new ForbiddenException('You are not enrolled in this course')
+    }
+   
 
     //check if quiz  order = 1 ,, no rules to check
     if(quiz.order == 1){
@@ -97,6 +104,7 @@ export class QuizService {
         lessonId: quiz.lessonId,
         status: 'in-progress'
       })
+
       //return questions without correctAnswerIndex
       const questions = quiz.questions.map(({ question, options }) => ({
         question,

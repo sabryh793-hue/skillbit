@@ -8,6 +8,7 @@ import {
   QueryFilter,
   DeleteResult,
 } from 'mongoose'
+import { ParseObjectIdPipe } from '../common/pipes/Objectid.pipe'
 
 
 export abstract class DBService<T> { //abstract class to avoid direct instantiation, ensuring that only subclasses can be created
@@ -51,6 +52,7 @@ export abstract class DBService<T> { //abstract class to avoid direct instantiat
     projection?: ProjectionType<T>
     options?: QueryOptions<T>
   }) {
+    new ParseObjectIdPipe().transform(id as any)
     return await this.model.findById(id, projection, options)
   }
 
@@ -73,6 +75,7 @@ export abstract class DBService<T> { //abstract class to avoid direct instantiat
   update: UpdateQuery<T>
   options?: QueryOptions<T>
 }) {
+    new ParseObjectIdPipe().transform(id as any)
     return await this.model.findByIdAndUpdate(id, update, options)
   }
   
@@ -83,6 +86,7 @@ export abstract class DBService<T> { //abstract class to avoid direct instantiat
     id?: string | Types.ObjectId
     options?: QueryOptions<T>
   }) {
+    new ParseObjectIdPipe().transform(id as any)
     return await this.model.findByIdAndDelete(id, options)
   }
 

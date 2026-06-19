@@ -16,6 +16,7 @@ import type { AuthReq } from '../../common/AuthReq';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { UserRoles } from 'src/common';
 import { User } from 'src/common/decorators/user.decorator';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('quiz')
 export class QuizController {
@@ -28,38 +29,37 @@ export class QuizController {
     return { message: 'Quiz created successfully', data: quiz }
   }
 
-  @Auth('Admin')
+  @Auth(UserRoles.Admin)
   @Patch('update/:id')
   async updateQuiz(@Param('id') quizId: string, @Body() updateQuizDto: UpdateQuizDto) {
     const quiz = await this.quizService.updateQuiz(quizId, updateQuizDto)
     return { message: 'Quiz updated successfully', data: quiz }
   }
 
-  @Auth('Admin')
+  @Auth(UserRoles.Admin)
   @Delete('delete/:id')
   async deleteQuiz(@Param('id') quizId: string) {
     await this.quizService.deleteQuiz(quizId)
     return { message: 'Quiz deleted successfully' }
   }
 
-  //@Auth('Student')
+  
+  @Auth(UserRoles.Admin , UserRoles.User)
   @Get('start/:id')
-  async startQuiz(@Param('id') quizId: string, @User('id') userId: string) {
+  async startQuiz(@Param('id',ParseObjectIdPipe) quizId: string , @User('id') userId: string) {
     const result = await this.quizService.startQuiz(quizId, userId)
     return { message: 'Quiz started successfully', data: result }
   }
 
-  @Auth('Student')
   @Post('submit')
   async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @User('id') userId: string) {
     const result = await this.quizService.submitQuiz(submitQuizDto, userId)
     return { message: 'Quiz submitted successfully', data: result }
   }
 
-  @Auth('Student')
   @Get('results/:quizId')
-  async getQuizResults(@Param('quizId') quizId: string, @Req() req: AuthReq) {
-    const result = await this.quizService.getQuizAnswers(quizId, req.user.id)
+  async getQuizResults(@Param('quizId') quizId: string, @User('id') userId: string) {
+    const result = await this.quizService.getQuizAnswers(quizId, userId)
     return { message: 'Quiz results retrieved successfully', data: result }
   }
 
