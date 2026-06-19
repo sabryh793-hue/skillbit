@@ -8,7 +8,6 @@ import {
   QueryFilter,
   DeleteResult,
 } from 'mongoose'
-import { ParseObjectIdPipe } from '../common/pipes/Objectid.pipe'
 
 
 export abstract class DBService<T> { //abstract class to avoid direct instantiation, ensuring that only subclasses can be created
