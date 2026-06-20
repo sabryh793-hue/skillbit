@@ -46,7 +46,7 @@ export class QuizService {
     //get the questions of contest from ai model
     
   const { data } = await axios.post(
-    'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+      'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
     {
       "topic": createQuizDto.topic,
       "easy_count": createQuizDto.easyCount,
