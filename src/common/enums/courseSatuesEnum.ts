@@ -8,4 +8,5 @@ export enum QuizStatusEnum {
     PASSED = 'passed',
     FAILED = 'failed',
     LOCKED = 'locked',
+    UNLOCKED = 'unlocked',
 }

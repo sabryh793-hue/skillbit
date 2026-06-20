@@ -48,15 +48,24 @@ export class QuizService {
   const { data } = await axios.post(
     'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
     {
-      topic: createQuizDto.topic,
-      question_number:10
-
+      "topic": createQuizDto.topic,
+      "easy_count": createQuizDto.easyCount,
+      "medium_count": createQuizDto.mediumCount,
+      "hard_count": createQuizDto.hardCount
     }
   )
+
+  //if order =1 then status = locked
+  let status = 'locked';
+  
+if(createQuizDto.order === 1){
+  status = 'unlocked';
+}
 
        // 2. create contest
        const quiz = await this.quizRepo.create({
          ...createQuizDto,
+         status,
          questions : data.questions.map((q: any) => ({
            question: q.question,
            options: q.options.map((o: any) => o.text),

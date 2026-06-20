@@ -31,6 +31,8 @@ class QuestionDto {
   correctAnswerHint?: string;
 }
 
+
+
 export class CreateQuizDto {
 
   @IsString()
@@ -63,16 +65,26 @@ export class CreateQuizDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  passingScore?: number; // default 70 in schema
+  passingScore: number; // default 70 in schema
 
-  @IsOptional()
   @IsNumber()
   @Min(0)
-  earnedXp?: number;
+  earnedXp: number;
 
-  @IsOptional()
   @IsNumber()
   @Min(0)
-  timeLimit?: number; // in seconds, 0 = no limit
+  timeLimit: number; // in seconds, 0 = no limit
+
+  @IsNumber()
+  @Min(0)
+  easyCount: number;
+
+  @IsNumber()
+  @Min(0)
+  mediumCount: number;
+
+  @IsNumber()
+  @Min(0)
+  hardCount: number;
 
 }
