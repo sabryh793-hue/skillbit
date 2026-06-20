@@ -16,6 +16,7 @@ import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { UserRepo } from '../../Models/User/user.repo';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import { calculateQuestionScore } from 'src/common';
 
 @Injectable()
 export class QuizService {
@@ -48,6 +49,8 @@ export class QuizService {
     'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
     {
       topic: createQuizDto.topic,
+      question_number:10
+
     }
   )
 
@@ -58,7 +61,7 @@ export class QuizService {
            question: q.question,
            options: q.options.map((o: any) => o.text),
            correctAnswerIndex: q.correct_answer,
-           correctAnswerHint: q.explanation || '',
+           correctAnswerHint: q.explanation ,
          }))
        })
    
@@ -97,22 +100,12 @@ export class QuizService {
 
     //check if quiz  order = 1 ,, no rules to check
     if(quiz.order == 1){
-      //create new attempt
-      const attempt = await this.quizAttemptRepo.create({
-        courseId: lesson.course,
-        userId,
-        quizId,
-        lessonId: quiz.lessonId,
-        status: 'in-progress'
-      })
-
       //return questions without correctAnswerIndex
       const questions = quiz.questions.map(({ question, options }) => ({
         question,
         options
       }))
       return {
-        attemptId: attempt['_id'],
         quizId: quiz._id,
         difficulty: quiz.difficulty,
         timeLimit: quiz.timeLimit,
@@ -120,7 +113,6 @@ export class QuizService {
         questions
       }
     }
-   
    
 
     // 3. check previous quiz passed
@@ -128,57 +120,26 @@ export class QuizService {
       const previousQuiz = await this.quizRepo.findOne({
         filter: { lessonId: quiz.lessonId, order: quiz.order - 1 }
       })
+
       if (previousQuiz) {
-        const isPreviousPassed = enrollment!.completedQuizes
+        const isPreviousPassed = enrollment.completedQuizes
           .some(id => id.toString() === previousQuiz._id.toString())
         if (!isPreviousPassed) {
           throw new ForbiddenException('Please pass the previous quiz first')
         }
       }
     }
-
-    // 4. check if already inProgress attempt exists → resume it 
-    const existingAttempt = await this.quizAttemptRepo.findOne({
-      filter: { userId, quizId, status: 'in-progress' }
-    })
-    if (existingAttempt) {
       const questions = quiz.questions.map(({ question, options }) => ({
         question,
         options
       }))
       return {
-        attemptId: existingAttempt._id,
         quizId: quiz._id,
         difficulty: quiz.difficulty,
         timeLimit: quiz.timeLimit,
         passingScore: quiz.passingScore,
         questions
       }
-    }
-
-    // 5. create new inProgress attempt
-    const attempt = await this.quizAttemptRepo.create({
-    
-      userId,
-      courseId: lesson.course,
-      quizId,
-      lessonId: quiz.lessonId,
-      status: 'in-progress'
-    })
-
-    // 6. return questions without correctAnswerIndex
-    const questions = quiz.questions.map(({ question, options }) => ({
-      question,
-      options
-    }))
-
-    return {
-      quizTitle: quiz.title,
-      difficulty: quiz.difficulty,
-      timeLimit: quiz.timeLimit,
-      passingScore: quiz.passingScore,
-      questions
-    }
   }
 
   async submitQuiz(submitQuizDto: SubmitQuizDto, userId: string) {
@@ -189,31 +150,35 @@ export class QuizService {
     if (!quiz) {
       throw new NotFoundException('Quiz not found')
     }
-   
 
-    // 2. check if user started the quiz
-    const attempt = await this.quizAttemptRepo.findOne({
-      filter:{
-        userId,
-        quizId,
-        status: 'in-progress' 
-        }
+    //if he already submitted the quiz
+    const existingAttempt = await this.quizAttemptRepo.findOne({
+      filter: { userId, quizId }
     })
-
-    if (!attempt) {
-      throw new ForbiddenException('Please start the quiz first')
+    if (existingAttempt) {
+      throw new ConflictException('You have already submitted this quiz')
     }
 
     // 3. check all questions are answered
     if (answers.length !== quiz.questions.length) {
-      throw new BadRequestException('Please answer all questions')
+      throw new BadRequestException('Please answer all questions first')
     }
+
+    //get the user
+    const user = await this.userRepo.findById({ id: userId }) as any 
+
+     let xpEarned=0
+     let xpLost=0
 
     // 4. calculate score
     let correctCount = 0
     quiz.questions.forEach((q, index) => {
       if (q.correctAnswerIndex === answers[index]) {
         correctCount++
+        xpEarned ++
+      }
+      else{
+        xpLost ++
       }
     })
 
@@ -221,13 +186,22 @@ export class QuizService {
     const passed = score >= quiz.passingScore
 
     // 5. calculate xp
-    const xpEarned = passed ? quiz.earnedXp : 0
-    const xpLost = !passed ? Math.round(quiz.earnedXp * 0.1) : 0
+   
+    if(passed){
+      xpEarned+=quiz.earnedXp
+    }
+   
+
+
+    //get the course id
+    const lesson = await this.lessonRepo.findById({ id: quiz.lessonId })
 
     // 6. update attempt
-    await this.quizAttemptRepo.findByIdAndUpdate({
-      id: attempt._id,
-      update: {
+    await this.quizAttemptRepo.create({
+        userId,
+        quizId,
+        courseId: lesson?.course,
+        lessonId: quiz.lessonId,
         answers,
         correctCount,
         score,
@@ -235,17 +209,15 @@ export class QuizService {
         timeTaken: timeTaken || 0,
         xpEarned,
         xpLost,
-        status: 'submitted'
-      }
-    })
+        status: 'submitted',
+      })
 
-    const lesson = await this.lessonRepo.findById({ id: quiz.lessonId })
 
     // 7. if passed → update enrollment + user score + unlock next lesson
     if (passed) {
       // add quiz to completedQuizes
       await this.enrollmentRepo.findOneAndUpdate({
-        filter: { userId, courseId: lesson?.course },
+        filter: { userId, enrolledCourses : lesson?.course },
         update: { $push: { completedQuizes: quizId } }
       })
 
@@ -290,9 +262,9 @@ export class QuizService {
       throw new NotFoundException('Quiz not found')
     }
 
-    // 2. find submitted attempt
+    // 2. find submitted attempt 
     const attempt = await this.quizAttemptRepo.findOne({
-      filter: { userId, quizId, status: 'submitted' }
+      filter: { userId, quizId }
     })
     if (!attempt) {
       throw new NotFoundException('No passed attempt found for this quiz')
@@ -304,7 +276,7 @@ export class QuizService {
       options: q.options,
       chosenAnswerIndex: attempt.answers[index],
       correctAnswerIndex: q.correctAnswerIndex,
-      correctAnswerHint: q.correctAnswerHint || '',
+      correctAnswerHint: q.correctAnswerHint ,
       isCorrect: attempt.answers[index] === q.correctAnswerIndex
     }))
 

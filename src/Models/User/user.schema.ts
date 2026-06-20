@@ -28,7 +28,7 @@ export class User  {
   @Prop({ type: String, default: null })
   profilePicture: string;
 
-  @Prop({ type: Number, default:0})
+  @Prop({ type: Number, default:1})
   level: number;
 
   @Prop({ type: Number, default: 0 })

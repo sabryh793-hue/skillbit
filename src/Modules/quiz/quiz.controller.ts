@@ -52,11 +52,11 @@ export class QuizController {
   @Auth(UserRoles.Admin , UserRoles.User)
   @Post('submit')
   async submitQuiz(@Body() submitQuizDto: SubmitQuizDto, @User('id') userId: string) {
-    console.log(userId)
     const result = await this.quizService.submitQuiz(submitQuizDto, userId)
     return { message: 'Quiz submitted successfully', data: result }
   }
 
+  @Auth(UserRoles.Admin , UserRoles.User)
   @Get('results/:quizId')
   async getQuizResults(@Param('quizId') quizId: string, @User('id') userId: string) {
     const result = await this.quizService.getQuizAnswers(quizId, userId)

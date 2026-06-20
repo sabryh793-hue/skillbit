@@ -14,5 +14,5 @@ export class SubmitQuizDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  timeTaken?: number; // seconds the user took to finish
+  timeTaken: number; // seconds the user took to finish
 }

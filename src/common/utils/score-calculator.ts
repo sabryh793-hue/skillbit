@@ -30,7 +30,7 @@ export const leaderboardModifiers = {
 
 export const calculateQuestionScore = (
   baseScore: number,
-  userLevel: UserLevels,
+  userLevel: number,
   userRank: Rank,
   difficulty: string,
   isCorrect: boolean,
