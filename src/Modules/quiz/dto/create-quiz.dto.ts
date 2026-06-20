@@ -77,14 +77,14 @@ export class CreateQuizDto {
 
   @IsNumber()
   @Min(0)
-  easyCount: number;
+  easy_count: number;
 
   @IsNumber()
   @Min(0)
-  mediumCount: number;
+  medium_count: number;
 
   @IsNumber()
   @Min(0)
-  hardCount: number;
+  hard_count: number;
 
 }
