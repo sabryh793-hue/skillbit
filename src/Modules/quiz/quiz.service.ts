@@ -49,9 +49,9 @@ export class QuizService {
       'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
     {
       "topic": createQuizDto.topic,
-      "easy_count": createQuizDto.easyCount,
-      "medium_count": createQuizDto.mediumCount,
-      "hard_count": createQuizDto.hardCount
+      "easy_count": createQuizDto.easy_count,
+      "medium_count": createQuizDto.medium_count,
+      "hard_count": createQuizDto.hard_count
     }
   )
 
@@ -66,6 +66,7 @@ if(createQuizDto.order === 1){
        const quiz = await this.quizRepo.create({
          ...createQuizDto,
          status,
+         totalQuestions : data.total_questions,
          questions : data.questions.map((q: any) => ({
            question: q.question,
            options: q.options.map((o: any) => o.text),
