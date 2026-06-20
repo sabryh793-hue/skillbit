@@ -275,6 +275,7 @@ if(createQuizDto.order === 1){
     const attempt = await this.quizAttemptRepo.findOne({
       filter: { userId, quizId }
     })
+
     if (!attempt) {
       throw new NotFoundException('No passed attempt found for this quiz')
     }
