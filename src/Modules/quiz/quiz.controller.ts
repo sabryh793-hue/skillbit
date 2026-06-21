@@ -62,5 +62,4 @@ export class QuizController {
     const result = await this.quizService.getQuizAnswers(quizId, userId)
     return { message: 'Quiz results retrieved successfully', data: result }
   }
-
 }

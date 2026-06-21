@@ -277,6 +277,7 @@ if(createQuizDto.order === 1){
       filter: { userId, quizId }
     })
 
+    console.log(attempt)
     if (!attempt) {
       throw new NotFoundException('No passed attempt found for this quiz')
     }
