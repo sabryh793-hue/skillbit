@@ -278,26 +278,26 @@ if(createQuizDto.order === 1){
     })
 
     console.log(attempt)
-    if (!attempt) {
-      throw new NotFoundException('No passed attempt found for this quiz')
-    }
+    // if (!attempt) {
+    //   throw new NotFoundException('No passed attempt found for this quiz')
+    // }
 
     // 3. merge questions with user answers
     const questionsWithAnswers = quiz.questions.map((q, index) => ({
       question: q.question,
       options: q.options,
-      chosenAnswerIndex: attempt.answers[index],
+      chosenAnswerIndex: attempt?.answers[index],
       correctAnswerIndex: q.correctAnswerIndex,
       correctAnswerHint: q.correctAnswerHint ,
-      isCorrect: attempt.answers[index] === q.correctAnswerIndex
+      isCorrect: attempt?.answers[index] === q.correctAnswerIndex
     }))
 
     return {
-      score: attempt.score,
-      correctCount: attempt.correctCount,
+      score: attempt?.score,
+      correctCount: attempt?.correctCount,
       totalQuestions: quiz.questions.length,
-      timeTaken: attempt.timeTaken,
-      xpEarned: attempt.xpEarned,
+      timeTaken: attempt?.timeTaken,
+      xpEarned: attempt?.xpEarned,
       questionsWithAnswers
     }
   }
