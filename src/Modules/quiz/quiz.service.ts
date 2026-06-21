@@ -278,9 +278,9 @@ if(createQuizDto.order === 1){
     })
 
     console.log(attempt)
-    // if (!attempt) {
-    //   throw new NotFoundException('No passed attempt found for this quiz')
-    // }
+    if (!attempt) {
+      throw new NotFoundException('No passed attempt found for this quiz')
+    }
 
     // 3. merge questions with user answers
     const questionsWithAnswers = quiz.questions.map((q, index) => ({
