@@ -336,12 +336,17 @@ export class CourseService {
 
     // get courses in this level
     const courses = await this.courseRepo.find({ level: levelnum }, {}, { sort: { order: 1 } });
-            
+       
+    //get enrollment of user
+    const enrollment = await this.enrollmentRepo.findOne({ filter: { userId } });
+    
     const coursesWithProgress = await Promise.all(
       courses.map(async (course) => {
         const progress = await this.getCourseProgress(userId, course['_id'].toString());
         return {
           id: course['_id'],
+          //is enrooled in this course?
+          isEnrolled: enrollment?.enrolledCourses.some((id: any) => id.toString() === course['_id'].toString()),
           title: course.title,
           description: course.description,
           type: course.type,

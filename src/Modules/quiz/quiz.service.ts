@@ -15,8 +15,6 @@ import { EnrollmentRepo } from '../../Models/Enrollments/enrollment.repo';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { UserRepo } from '../../Models/User/user.repo';
 import axios from 'axios';
-import mongoose from 'mongoose';
-import { calculateQuestionScore } from 'src/common';
 
 @Injectable()
 export class QuizService {
