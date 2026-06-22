@@ -7,5 +7,16 @@ import { UpdateLeaderboardDto } from './dto/update-leaderboard.dto';
 export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) {}
 
+  @Post("update")
+async updateLeaderboard(@Body() dto: UpdateLeaderboardDto) {
+    await this.leaderboardService.updateLeaderboard(dto.contestId);
+    return {message: "Leaderboard updated successfully"}
+  }
+
+  @Get()
+  async getLeaderboard() {
+    const leaderboard = await this.leaderboardService.getLeaderboard();
+    return {message: "Leaderboard fetched successfully", leaderboard}
+  }
  
 }

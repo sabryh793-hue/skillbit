@@ -21,7 +21,6 @@ export class UserService {
 
   return user
 }
-
   async getUserProfile(userId: string) {
   const user = await this.userRepo.findById({
     id: userId,
@@ -39,8 +38,7 @@ export class UserService {
 
   return user
 }
-
-    async updateProfile(userId: string, updateProfileDto: updateProfileDto) {
+  async updateProfile(userId: string, updateProfileDto: updateProfileDto) {
   const user = await this.userRepo.findByIdAndUpdate({
     id: userId,
     update: updateProfileDto,// This will only update the fields that are present in the updateProfileDto
@@ -53,7 +51,6 @@ export class UserService {
 
   return user
 }
-
   async deleteUser(userId: string) {
   const user = await this.userRepo.findByIdAndDelete({ id: userId })
 
@@ -61,7 +58,6 @@ export class UserService {
     throw new NotFoundException('User not found')
   }
 }
-
  async changePassword( userId: string ,changePasswordDto: changePasswordDto) {
   const { oldPassword, newPassword } = changePasswordDto
 
@@ -88,7 +84,6 @@ export class UserService {
 
   return true
 }
-
  async sendFriendRequest(fromId: string, toId: string) {
   if (toId.toString() === fromId.toString()) {
     throw new BadRequestException('You cannot send a friend request to yourself')
@@ -119,7 +114,6 @@ export class UserService {
 
   return true
 }
-
 async acceptFriendRequest(user: any, fromId: string) {
   const request = user.friendRequests.find((req) => req.from.toString() === fromId.toString())
 
@@ -142,7 +136,6 @@ async acceptFriendRequest(user: any, fromId: string) {
 
   return true
 }
- 
  async rejectFriendRequest(user: any, fromId: string) {
   const request = user.friendRequests.find((req) => req.from.toString() === fromId.toString())
 
@@ -159,7 +152,6 @@ async acceptFriendRequest(user: any, fromId: string) {
 
   return true
 }
-
  async removeFriend(user: any, friendId: string) {
 
   const isFriend = user.friends.find((friend) => friend.toString() === friendId.toString())
@@ -180,7 +172,6 @@ async acceptFriendRequest(user: any, fromId: string) {
 
   return true
 }
-
   async getFriends(userId: string) {
   const me = await this.userRepo.findById({
     id: userId,
@@ -194,7 +185,6 @@ async acceptFriendRequest(user: any, fromId: string) {
 
   return me
 }
-
 async uploadProfilePicture(userId: string, file: Express.Multer.File) {
   const result: any = await uploadToCloudinary(file, 'profile-pictures')
   
@@ -205,4 +195,11 @@ async uploadProfilePicture(userId: string, file: Express.Multer.File) {
 
   return { profilePicture: result.secure_url }
 }
+
+//get courses progress
+
+
+//get 12 months of contest score of user
+
+
 }

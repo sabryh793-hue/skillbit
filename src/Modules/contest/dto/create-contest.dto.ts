@@ -20,6 +20,18 @@ export class CreateContestDto {
   @IsString()
   @IsNotEmpty()
   difficulty: string
+  
+  @IsNumber()
+  @IsNotEmpty()
+  easy_count: number
+
+  @IsNumber()
+  @IsNotEmpty()
+  medium_count: number
+
+  @IsNumber()
+  @IsNotEmpty()
+  hard_count: number
 
   @IsDate()
   @Type(() => Date)

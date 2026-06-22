@@ -43,8 +43,8 @@ export class Contest  {
 })
 questions: { question: string; options: string[]; correctAnswerIndex: string }[]
 
-@Prop({ type: Number, required: true, default: 5 })
-questionScore: number // base score for each question in this contest
+  @Prop({ type: Number, required: true, default: 1 })
+  questionScore: number // base score for each question in this contest
   // Duel only
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, default: null })
   challengerId: mongoose.Schema.Types.ObjectId;

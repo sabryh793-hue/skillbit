@@ -34,6 +34,7 @@ export class UserController {
      return { message: 'Profile updated successfully', data: user }
 }
 
+    @Auth(UserRoles.Admin)
     @Delete('delete')
        async deleteUser(@Req() req: AuthReq) {
         await this.userService.deleteUser(req.user['_id'])

@@ -14,8 +14,15 @@ export class ContestController {
   @Auth(UserRoles.Admin) 
   @Post('create')
   async createContest(@Body() dto: CreateContestDto) {
-    const contest = await this.contestService.createContest(dto)
-    return { message: 'Contest created successfully', data: contest }
+    const data=await this.contestService.createContest(dto)
+    return { message: 'Contest created successfully',data }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('details/:id')
+  async contestDetails(@Param('id') id: string ){
+   const data= await this.contestService.contestDetails(id)
+    return { message: 'Contest details fetched successfully',data }
   }
 
   @UseGuards(AuthGuard)
@@ -28,20 +35,19 @@ export class ContestController {
   
   @Auth(UserRoles.Admin) 
   @Post('start/:id')
-  async startContest(@Param('id') contestId: string, @Req() req: AuthReq) {
+  async startContest(@Param('id') contestId: string) {
     const questions = await this.contestService.startContest( contestId)
     return { message: 'Contest started successfully',data: questions }
   }
   
 
   @UseGuards(AuthGuard)
-  @Post('submit/:id')
+  @Post('submit')
   async submitContest(
-    @Param('id') contestId: string,
     @Body() dto: SubmitContestDto,
     @Req() req: AuthReq
   ) {
-    const result = await this.contestService.submitContest(req.user, contestId, dto.answers, dto.timeTaken)
+    const result = await this.contestService.submitContest(req.user,dto)
     return { message: 'Contest submitted successfully', data: result }
   }
 

@@ -10,6 +10,7 @@ import { CronJob } from 'cron';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { AchievementService } from '../achievement/achievement.service';
 import axios from 'axios';
+import { SubmitContestDto } from './dto/submitContestDto';
 
 @Injectable()
 export class ContestService {
@@ -49,15 +50,19 @@ export class ContestService {
 
     //get the questions of contest from ai model
     const { data } = await axios.post(
-    'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
-    {
-      topic : dto.topic
-    }
-  );
+          'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+        {
+          "topic": dto.topic,
+          "easy_count": dto.easy_count,
+          "medium_count": dto.medium_count,
+          "hard_count": dto.hard_count
+        }
+      )
+
     // 2. create contest
     const contest = await this.contestRepo.create({
-      ...dto,
-      questions : data.questions.map((q: any) => ({
+        ...dto,
+        questions : data.questions.map((q: any) => ({
         question: q.question,
         options: q.options.map((o: any) => o.text),
         correctAnswerIndex: q.correct_answer,
@@ -66,7 +71,20 @@ export class ContestService {
       status: 'upcoming',
     })
 
-    return contest
+    return contest['_id']
+  }
+
+  async contestDetails(contestId: string) {
+    const contest = await this.contestRepo.findById({ id: contestId })
+    if (!contest) {
+      throw new NotFoundException('Contest not found')
+    }
+     return {
+      id : contest['_id'],
+      remainingTime: contest.startTime.getTime() - Date.now(),
+      startingDateofContest: contest.startTime,
+      difficulty : contest.difficulty,
+    }
   }
 
   async joinContest(user: any, contestId: string) {
@@ -136,13 +154,24 @@ export class ContestService {
       id: contestId,
       update: { status: 'active' }
     })
+
+    const questions = contest.questions.map(({ question, options }) => ({
+        question,
+        options
+      }))
   
-    //return queztions of contest
-    return { questions : contest.questions }
+    //return questions of contest
+    return {
+       id : contest._id,
+       difficulty : contest.difficulty,
+       timeLimit : contest.duration,
+       passingScore : contest.questionScore,
+       participants : contest.participants.length,
+       questions  }
   }
 
-  async submitContest(user: any, contestId: string, answers: string[], timeTaken: number) {
-    const contest = await this.contestRepo.findById({ id: contestId })
+  async submitContest(user: any, dto:SubmitContestDto) {
+    const contest = await this.contestRepo.findById({ id: dto.contestId })
     if (!contest) throw new NotFoundException('Contest not found')
     
     const isParticipant = contest.participants
@@ -151,7 +180,7 @@ export class ContestService {
       throw new ForbiddenException('You are not a participant in this contest')
     
     const existingResult = await this.contestResultRepo.findOne({
-      filter: { contestId, userId: user._id }
+      filter: { contestId: dto.contestId, userId: user._id }
     })
     if (existingResult)
       throw new BadRequestException('You already submitted this contest')
@@ -162,9 +191,9 @@ export class ContestService {
 
   
     contest.questions.forEach((q, index) => {
-      if (answers[index] === '-1' || answers[index] === undefined) return//means question is not answered return to the next iteration
+      if (dto.answers[index] === '-1' || dto.answers[index] === undefined) return//means question is not answered return to the next iteration
 
-      const isCorrect = q.correctAnswerIndex === answers[index]
+      const isCorrect = q.correctAnswerIndex === dto.answers[index]
       if (isCorrect) correctCount++
     
       const { gained, lost } = calculateQuestionScore(
@@ -180,12 +209,12 @@ export class ContestService {
     })
 
     await this.contestResultRepo.create({
-      contestId,
+      contestId: dto.contestId,
       userId: user._id,
-      answers,
+      answers: dto.answers,
       correctCount,
       score: totalScore,
-      timeTaken,
+      timeTaken: dto.timeTaken,
       xpEarned: totalScore,
       xpLost: totalLost
     })
@@ -201,14 +230,15 @@ export class ContestService {
   
     return {
       correctCount,
+      wrongCount : contest.questions.length - correctCount,
       totalQuestions: contest.questions.length,
       score: totalScore,
       lost: totalLost,
-      timeTaken
+      timeTaken: dto.timeTaken
     }
   }
 
- async getContestResults(userId: string, contestId: string) {
+  async getContestResults(userId: string, contestId: string) {
   const contest = await this.contestRepo.findById({ id: contestId })
   if (!contest) throw new NotFoundException('Contest not found')
 
@@ -248,8 +278,11 @@ export class ContestService {
       })
 
       return {// returns to the array, not the function,that's what Promise.all is for
-        rank: position,
         score: Math.floor(result.score * bonus),
+        correctCount : result.correctCount,
+        wrongCount : contest.questions.length - result.correctCount,
+        totalQuestions: contest.questions.length,
+        rank: position,
         timeTaken: result.timeTaken,
         fullname: user?.fullname,
         profilePicture: user?.profilePicture,
@@ -302,7 +335,13 @@ export class ContestService {
       chosenAnswerIndex: result.answers[index],
     }))
 
-    return { score: result.score, correctCount: result.correctCount, questionsWithAnswers }
+    return { 
+      score: result.score,
+       correctCount: result.correctCount, 
+       timeTaken: result.timeTaken,
+       xpEarned: result.xpEarned,
+       questionsWithAnswers 
+      }
   }
 
 
