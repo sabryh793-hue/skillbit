@@ -32,7 +32,7 @@ export class User  {
   @Prop({ type: Number, default:1})
   level: number;
 
-  @Prop({ type: Number, default: 0 })
+  @Prop({ type: Number, default: 0,min:0 })
   score: number; 
 
   @Prop({ type: String, enum:Rank, default: Rank.beginner })//last badge earned
