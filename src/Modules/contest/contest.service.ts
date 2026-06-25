@@ -142,7 +142,6 @@ try {
     const contest = await this.contestRepo.findById({ id: contestId })
     if (!contest) throw new NotFoundException('Contest not found')
 
-    if (contest.status === 'active') throw new BadRequestException('Contest is already active')
     if (contest.status === 'finished') throw new BadRequestException('Contest is already finished')
 
       //check if contest on time
