@@ -34,7 +34,7 @@ export class ContestController {
   }
 
   
-  @Auth() 
+  @Auth(UserRoles.User, UserRoles.Admin) 
   @Post('start/:id')
   async startContest(@Param('id') contestId: string) {
     const questions = await this.contestService.startContest( contestId)
