@@ -143,7 +143,7 @@ try {
     if (!contest) throw new NotFoundException('Contest not found')
 
 
-    if (contest.startTime > new Date()) throw new BadRequestException('Contest is not started yet')  
+    if (contest.startTime > new Date(Date.now())) throw new BadRequestException('Contest is not started yet')  
     if (contest.status === 'finished') throw new BadRequestException('Contest is already finished')
 
     
