@@ -145,6 +145,9 @@ try {
     if (contest.status === 'active') throw new BadRequestException('Contest is already active')
     if (contest.status === 'finished') throw new BadRequestException('Contest is already finished')
 
+      //check if contest on time
+    if (contest.startTime > new Date()) throw new BadRequestException('Contest is not started yet')  
+    
     await this.contestRepo.findByIdAndUpdate({
       id: contestId,
       update: { status: 'active' }
