@@ -175,7 +175,7 @@ try {
     
     const contest = await this.contestRepo.findOne({
       filter: {
-        level: user.level,
+        level: user.level
       }
     })
 
