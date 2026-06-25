@@ -12,8 +12,8 @@ export class Contest  {
   @Prop({ type: String, enum: ['global', 'duel'], required: true })
   type: string;
 
-  @Prop({ type: String, required: true })
-  level: string;
+  @Prop({ type: Number, required: true })
+  level: number;
 
   @Prop({ type: String, required: true })
   topic: string;
@@ -38,10 +38,11 @@ export class Contest  {
     question: { type: String, required: true },
     options: { type: [String], required: true },
     correctAnswerIndex: { type: String, required: true },
+    correctAnswerHint: { type: String, required: true }
   }],
   default: []
 })
-questions: { question: string; options: string[]; correctAnswerIndex: string }[]
+questions: { question: string; options: string[]; correctAnswerIndex: string; correctAnswerHint: string }[]
 
   @Prop({ type: Number, required: true, default: 1 })
   questionScore: number // base score for each question in this contest

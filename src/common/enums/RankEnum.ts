@@ -1,7 +1,7 @@
 export enum Rank {
- beginner,
- bronze,
- silver,
- gold,
- legend
+ beginner='beginner',
+ bronze='bronze',
+ silver='silver',
+ gold='gold',
+ legend='legend'
 }

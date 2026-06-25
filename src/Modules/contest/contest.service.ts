@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { CreateContestDto } from './dto/create-contest.dto';
 import { ContestRepo } from 'src/Models/Contests/contest.repo';
 import { UserRepo } from 'src/Models/User/user.repo';
@@ -11,6 +11,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { AchievementService } from '../achievement/achievement.service';
 import axios from 'axios';
 import { SubmitContestDto } from './dto/submitContestDto';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 
 @Injectable()
 export class ContestService {
@@ -20,7 +21,8 @@ export class ContestService {
     private readonly contestResultRepo: ContestResultRepo,
     private readonly duelRequestRepo: DuelRequestRepo,
     private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly achievementService: AchievementService
+    private readonly achievementService: AchievementService,
+    private readonly leaderboardService: LeaderboardService,
   ) { }
 
 
@@ -49,16 +51,22 @@ export class ContestService {
       throw new ConflictException('There is a contest already exists at this time')
 
     //get the questions of contest from ai model
-    const { data } = await axios.post(
-          'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
-        {
-          "topic": dto.topic,
-          "easy_count": dto.easy_count,
-          "medium_count": dto.medium_count,
-          "hard_count": dto.hard_count
-        }
-      )
-
+    let data;
+try {
+    data  = await axios.post(
+    'https://graduation-project-production-0a8a.up.railway.app/api/v1/quiz/generate',
+    {
+      topic: dto.topic,
+      easy_count: dto.easy_count,
+      medium_count: dto.medium_count,
+      hard_count: dto.hard_count
+    }
+  )
+} catch (error) {
+  throw new ServiceUnavailableException(
+    'Quiz generation service is currently unavailable. Please try again later.'
+  )
+}
     // 2. create contest
     const contest = await this.contestRepo.create({
         ...dto,
@@ -66,28 +74,15 @@ export class ContestService {
         question: q.question,
         options: q.options.map((o: any) => o.text),
         correctAnswerIndex: q.correct_answer,
+        correctAnswerHint: q.explanation ,
+        status: 'upcoming',
       })),
-
-      status: 'upcoming',
-    })
+    }) 
 
     return contest['_id']
   }
 
-  async contestDetails(contestId: string) {
-    const contest = await this.contestRepo.findById({ id: contestId })
-    if (!contest) {
-      throw new NotFoundException('Contest not found')
-    }
-     return {
-      id : contest['_id'],
-      remainingTime: contest.startTime.getTime() - Date.now(),
-      startingDateofContest: contest.startTime,
-      difficulty : contest.difficulty,
-    }
-  }
-
-  async joinContest(user: any, contestId: string) {
+   async joinContest(user: any, contestId: string) {
     // 1. check contest exists
     const contest = await this.contestRepo.findById({ id: contestId })
     if (!contest) {
@@ -170,6 +165,31 @@ export class ContestService {
        questions  }
   }
 
+  async contestDetailsOfUser(userId: string) {
+    const user = await this.userRepo.findById({ id: userId })
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+    
+    const contest = await this.contestRepo.findOne({
+      filter: {
+        level: user.level,
+        status: 'upcoming'
+      }
+    })
+
+    if (!contest) {
+      throw new NotFoundException('Contest not found')
+    }
+     return {
+      level : contest.level,
+      id : contest?.['_id'],
+      remainingTime: contest?.startTime.getTime() - Date.now(),
+      startingDateofContest: contest?.startTime,
+      difficulty : contest?.difficulty,
+    }
+  } 
+
   async submitContest(user: any, dto:SubmitContestDto) {
     const contest = await this.contestRepo.findById({ id: dto.contestId })
     if (!contest) throw new NotFoundException('Contest not found')
@@ -208,10 +228,10 @@ export class ContestService {
       totalLost += lost
     })
 
-    await this.contestResultRepo.create({
+    await this.contestResultRepo.create({ 
       contestId: dto.contestId,
       userId: user._id,
-      answers: dto.answers,
+      answers: dto.answers, 
       correctCount,
       score: totalScore,
       timeTaken: dto.timeTaken,
@@ -263,7 +283,8 @@ export class ContestService {
       results: allResults
     }
   }
-
+//update leaderboard
+await this.leaderboardService.updateLeaderboard(contestId)
 
   // global → top 3 + leaderboard bonus
   const top3 = await Promise.all( 
@@ -333,11 +354,14 @@ export class ContestService {
       options: q.options,
       correctAnswerIndex: q.correctAnswerIndex,
       chosenAnswerIndex: result.answers[index],
+      hint: q.correctAnswerHint ,
+      isCorrect: result?.answers[index] === q.correctAnswerIndex
     }))
 
     return { 
       score: result.score,
        correctCount: result.correctCount, 
+       totalQuestions: contest.questions.length,
        timeTaken: result.timeTaken,
        xpEarned: result.xpEarned,
        questionsWithAnswers 

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
-import { ContestService } from './contest.service';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Req } from '@nestjs/common'; 
+import { ContestService } from './contest.service'; 
 import { CreateContestDto } from './dto/create-contest.dto';
 import { Auth, AuthGuard, UserRoles } from 'src/common';
 import type { AuthReq } from 'src/common/AuthReq';
 import { SubmitContestDto } from './dto/submitContestDto';
+import { User } from 'src/common/decorators/user.decorator';
 
 
 @Controller('contest')
@@ -19,11 +20,11 @@ export class ContestController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('details/:id')
-  async contestDetails(@Param('id') id: string ){
-   const data= await this.contestService.contestDetails(id)
-    return { message: 'Contest details fetched successfully',data }
-  }
+  @Get('details')
+  async contestDetailsOfUser(@User('id') userId: string ){
+    const data= await this.contestService.contestDetailsOfUser(userId)
+    return { message: 'Contest details fetched successfully',data } 
+  } 
 
   @UseGuards(AuthGuard)
   @Post('join/:id')
@@ -53,19 +54,19 @@ export class ContestController {
 
 
   @UseGuards(AuthGuard)
+  @Get('answers/:id')
+  async getContestAnswers(@Param('id') contestId: string,@User('id') userId: string) {
+    const result = await this.contestService.getContestAnswers(userId, contestId)
+    return { message: 'Answers fetched successfully', data: result }
+  }
+
+  @UseGuards(AuthGuard)
   @Get('results/:id')
-  async getContestResults(@Param('id') contestId: string, @Req() req: AuthReq) {
-    const result = await this.contestService.getContestResults(req.user['_id'], contestId)
+  async getContestResults(@Param('id') contestId: string, @User('id') userId: string) {
+    const result = await this.contestService.getContestResults(userId, contestId)
     return { message: 'Results fetched successfully', data: result }
   }
 
-
-  @UseGuards(AuthGuard)
-  @Get('answers/:id')
-  async getContestAnswers(@Param('id') contestId: string, @Req() req: AuthReq) {
-    const result = await this.contestService.getContestAnswers(req.user['_id'], contestId)
-    return { message: 'Answers fetched successfully', data: result }
-  }
 
   
   // Duel Contest

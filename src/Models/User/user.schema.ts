@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { Badge } from '../Badges/badge.schema';
 import { Achievement } from '../Achievements/achievement.schema';
 import { UserRoles } from 'src/common';
+import { Rank } from 'src/common/enums/RankEnum';
 
 @Schema({timestamps:true})
 export class User  {
@@ -34,8 +35,8 @@ export class User  {
   @Prop({ type: Number, default: 0 })
   score: number; 
 
-  @Prop({ type: String, default: 'beginner' })//last badge earned
-  rank: string;
+  @Prop({ type: String, enum:Rank, default: Rank.beginner })//last badge earned
+  rank: Rank;
 
   @Prop({
   type: [{ from: { type: mongoose.Schema.Types.ObjectId } }],

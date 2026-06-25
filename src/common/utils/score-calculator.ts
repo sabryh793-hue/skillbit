@@ -41,6 +41,7 @@ export const calculateQuestionScore = (
   const rank  = rankModifiers[userRank]
   const hard  = hardnessModifiers[difficulty]
 
+
   if (isCorrect) {
     let score = baseScore
     score *= level.multiplier

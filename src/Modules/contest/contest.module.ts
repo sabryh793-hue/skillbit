@@ -22,6 +22,12 @@ import { EnrollmentRepo } from 'src/Models/Enrollments/enrollment.repo';
 import { Enrollment, EnrollmentSchema } from 'src/Models/Enrollments/enrollment.schema';
 import { CourseRepo } from 'src/Models/Cousrses/course.repo';
 import { Course, CourseSchema } from 'src/Models/Cousrses/course.schema';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
+import { LeaderboardRepo } from 'src/Models/Leaderboard/leaderboard.repo.';
+import { LeaderboardController } from '../leaderboard/leaderboard.controller';
+import { BadgeRepo } from 'src/Models/Badges/badge.repo';
+import { Leaderboard, LeaderboardSchema } from 'src/Models/Leaderboard/leaderboard.schema';
+import { Badge, BadgeSchema } from 'src/Models/Badges/badge.schema';
 
 
 @Module({
@@ -35,9 +41,11 @@ import { Course, CourseSchema } from 'src/Models/Cousrses/course.schema';
       { name: Achievement.name, schema: AchievementSchema },
       { name: Enrollment.name, schema: EnrollmentSchema },
       { name: Course.name, schema: CourseSchema },
+      { name: Leaderboard.name, schema: LeaderboardSchema },
+      { name: Badge.name, schema: BadgeSchema },
     ]),
   ],
-  controllers: [ContestController,AuthController],
-  providers: [ContestService,AuthService,ContestRepo,UserRepo,ContestResultRepo,DuelRequestRepo,TokenService,JwtService,AchievementService,AchievementRepo,EnrollmentRepo,CourseRepo],
+  controllers: [ContestController,AuthController,LeaderboardController],
+  providers: [ContestService,AuthService,ContestRepo,UserRepo,ContestResultRepo,DuelRequestRepo,TokenService,JwtService,AchievementService,AchievementRepo,EnrollmentRepo,CourseRepo,LeaderboardService,LeaderboardRepo,BadgeRepo],
 })
 export class ContestModule {}

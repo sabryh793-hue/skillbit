@@ -30,8 +30,8 @@ export class ContestResult {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Badge', default: null })
   badgeEarned: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: [Number], default: [] })
-  answers: number[]; // user's answers
+  @Prop({ type: [String], default: [] })
+  answers: string[]; // user's answers
 
 }
 

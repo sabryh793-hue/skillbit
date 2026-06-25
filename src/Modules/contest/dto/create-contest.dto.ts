@@ -9,9 +9,10 @@ export class CreateContestDto {
   @IsEnum(['global', 'duel'])
   type: string
 
-  @IsString()
+  
   @IsNotEmpty()
-  level: string
+  @IsNumber()
+  level: number
 
   @IsString()
   @IsNotEmpty()
