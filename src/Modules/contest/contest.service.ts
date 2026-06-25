@@ -142,10 +142,10 @@ try {
     const contest = await this.contestRepo.findById({ id: contestId })
     if (!contest) throw new NotFoundException('Contest not found')
 
+
+    if (contest.startTime > new Date()) throw new BadRequestException('Contest is not started yet')  
     if (contest.status === 'finished') throw new BadRequestException('Contest is already finished')
 
-      //check if contest on time
-    if (contest.startTime > new Date()) throw new BadRequestException('Contest is not started yet')  
     
     await this.contestRepo.findByIdAndUpdate({
       id: contestId,
