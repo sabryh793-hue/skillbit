@@ -89,11 +89,12 @@ try {
       throw new NotFoundException('Contest not found')
     }
 
-    // 2. check contest is not finished
+    
     if (contest.status === 'finished') {
       throw new BadRequestException('Contest is already finished')
     }
 
+    
     // 3. check user level matches contest level
     if (user.level.toString() !== contest.level.toString()) {
       throw new ForbiddenException('You are not eligible for this contest')
@@ -124,6 +125,9 @@ try {
     // schedule reminder 15 min before
     const reminderTime = new Date(contest.startTime.getTime() - 15 * 60 * 1000)
 
+    //if contest ic active , no email will be sent 
+    if (contest.status === 'active') return;
+    
     const job = new CronJob(reminderTime, async () => {
       await sendEmail({
         to: user.email,
