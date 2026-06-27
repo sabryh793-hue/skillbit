@@ -54,18 +54,20 @@ export class AuthService {
   async googleLogin(googleLoginDto: googleLoginDto) {
     //get data from request
     const { idToken } = googleLoginDto
-    
+    console.log(process.env.GOOGLE_CLIENT_ID);
     //verify the token with google
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
-    let ticket: any,payload:any
+    let ticket:any,payload:any
     try {
      ticket = await client.verifyIdToken({
       idToken,
-      audience: process.env.GOOGLE_CLIENT_ID  // to ensure the token is meant for our app only and not some other app that also uses google login
-    })    
+     // audience: process.env.GOOGLE_CLIENT_ID  // to ensure the token is meant for our app only and not some other app that also uses google login
+    })   
+        
      payload = ticket.getPayload()
     } catch (error) {
-      throw new UnauthorizedException('Invalid Google token')
+      console.log(error);
+      throw error;
     }
     
     //check if user already exists in our database

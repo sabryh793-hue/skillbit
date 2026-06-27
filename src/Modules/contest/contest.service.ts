@@ -126,7 +126,7 @@ try {
     const reminderTime = new Date(contest.startTime.getTime() - 15 * 60 * 1000)
 
     //if contest ic active , no email will be sent 
-    if (contest.status === 'active') return;
+    if (contest.status === 'active') return true;
     
     const job = new CronJob(reminderTime, async () => {
       await sendEmail({
