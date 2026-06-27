@@ -59,7 +59,7 @@ export class CourseService {
       { sort: { order: 1 } }
     )
     //isEnrolledCourse
-    const isEnrolled = await this.enrollmentRepo.findOne({ filter: {  userId, enrolledCourses: courseId } });
+    const enrollment = await this.enrollmentRepo.findOne({ filter: {  userId, enrolledCourses: courseId } });
 
     const lessonsWithQuizzes = await Promise.all(
       lessons.map(async (lesson) => {
@@ -76,9 +76,14 @@ export class CourseService {
       })
     )
 
+    let isEnrolled = false
+    if(enrollment){
+      isEnrolled = true
+    }
+    
     return {
       ...course.toObject(),
-      isEnrolled: !!isEnrolled,//this line to convert the result to boolean if there is a value it will be true else false
+     isEnrolled,//this line to convert the result to boolean if there is a value it will be true else false
       lessons: lessonsWithQuizzes
     }
   }
