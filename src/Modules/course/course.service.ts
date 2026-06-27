@@ -83,7 +83,7 @@ export class CourseService {
     
     return {
       ...course.toObject(),
-     isEnrolled,//this line to convert the result to boolean if there is a value it will be true else false
+     isEnrolled,
       lessons: lessonsWithQuizzes
     }
   }
