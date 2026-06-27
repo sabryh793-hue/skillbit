@@ -59,7 +59,7 @@ export class CourseService {
       { sort: { order: 1 } }
     )
     //isEnrolledCourse
-    const enrollment = await this.enrollmentRepo.findOne({ filter: {  userId, enrolledCourses: courseId } });
+    const isEnrolled = await this.enrollmentRepo.findOne({ filter: {  userId, enrolledCourses: courseId } });
 
     const lessonsWithQuizzes = await Promise.all(
       lessons.map(async (lesson) => {
@@ -78,6 +78,7 @@ export class CourseService {
 
     return {
       ...course.toObject(),
+      isEnrolled,
       lessons: lessonsWithQuizzes
     }
   }
