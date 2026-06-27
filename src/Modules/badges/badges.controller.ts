@@ -18,4 +18,11 @@ export class BadgesController {
   ) {
     //return this.badgeService.createBadge(file, date);
   }
+
+  @Post('assign')
+  async assignBadges(
+    @Body() body: { userIds: string[]; badgeIds: string[] }
+  ) {
+    return this.badgeService.addBadgesToUsers(body.userIds, body.badgeIds);
+  }
 }
