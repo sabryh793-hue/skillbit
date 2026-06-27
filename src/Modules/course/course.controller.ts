@@ -77,8 +77,8 @@ export class CourseController {
 
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getCourseById(@Param('id') id: string) {
-    const course = await this.courseService.getCourseById(id);
+  async getCourseById(@Param('id') id: string, @User('id') userId: string) {
+    const course = await this.courseService.getCourseById(id, userId);
     return {message: "Course fetched successfully", course}
   }
 

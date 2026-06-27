@@ -49,15 +49,17 @@ export class CourseService {
     return courses;
   }
 
-  async getCourseById(courseId: string) {
+  async getCourseById(courseId: string,userId:string) {
     const course = await this.courseRepo.findById({ id: courseId })
     if (!course) throw new NotFoundException('Course not found')
 
     const lessons = await this.lessonRepo.find(
-      { course: courseId }, 
+      { course: courseId },
       {},
       { sort: { order: 1 } }
     )
+    //isEnrolledCourse
+    const enrollment = await this.enrollmentRepo.findOne({ filter: {  userId, enrolledCourses: courseId } });
 
     const lessonsWithQuizzes = await Promise.all(
       lessons.map(async (lesson) => {
