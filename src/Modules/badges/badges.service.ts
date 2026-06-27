@@ -25,7 +25,7 @@ export class BadgeService {
   }
 
   async addBadgesToUsers(userIds: string[], badgeIds: string[]) {
-    const results = [];
+    const results: any[] = [];
     for (const userId of userIds) {
       const updatedUser = await this.userRepo.findByIdAndUpdate({
         id: userId,
